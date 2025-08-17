@@ -1,0 +1,7 @@
+[
+  { "id": "P001", "name": "Kitchen Unit", "uom": "EACH", "defaultLocationId": "LOC01" },
+  { "id": "P002", "name": "Wall Cabinet", "uom": "EACH", "defaultLocationId": "LOC02" },
+  { "id": "P003", "name": "Drawer Box", "uom": "EACH", "defaultLocationId": "LOC03" },
+  { "id": "P004", "name": "Worktop", "uom": "EACH", "defaultLocationId": "LOC01" },
+  { "id": "P005", "name": "Hinge Pack", "uom": "PACK", "defaultLocationId": "LOC03" }
+]

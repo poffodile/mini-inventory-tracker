@@ -1,0 +1,5 @@
+[
+  { "id": "LOC01", "name": "Aisle 1 - Bin A" },
+  { "id": "LOC02", "name": "Aisle 2 - Bin B" },
+  { "id": "LOC03", "name": "Aisle 3 - Bin C" }
+]

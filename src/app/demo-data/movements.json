@@ -1,0 +1,47 @@
+[
+  {
+    "id": "M001",
+    "type": "RECEIPT",
+    "productId": "P001",
+    "toLocationId": "LOC01",
+    "qty": 50,
+    "ref": "PO-10001",
+    "timestamp": "2025-08-10T08:30:00Z"
+  },
+  {
+    "id": "M002",
+    "type": "PICK",
+    "productId": "P001",
+    "fromLocationId": "LOC01",
+    "qty": 20,
+    "ref": "ORD-9001",
+    "timestamp": "2025-08-10T09:45:00Z"
+  },
+  {
+    "id": "M003",
+    "type": "RECEIPT",
+    "productId": "P002",
+    "toLocationId": "LOC02",
+    "qty": 5,
+    "ref": "PO-10002",
+    "timestamp": "2025-08-10T09:00:00Z"
+  },
+  {
+    "id": "M004",
+    "type": "RECEIPT",
+    "productId": "P003",
+    "toLocationId": "LOC03",
+    "qty": 2,
+    "ref": "PO-10003",
+    "timestamp": "2025-08-10T10:00:00Z"
+  },
+  {
+    "id": "M005",
+    "type": "PICK",
+    "productId": "P005",
+    "fromLocationId": "LOC03",
+    "qty": 1,
+    "ref": "ORD-9002",
+    "timestamp": "2025-08-11T15:00:00Z"
+  }
+]
