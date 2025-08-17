@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import products from './../demo-data/products.json';
-import locations from './../demo-data/locations.json';
-import stockLedger from './../demo-data/stockLedger.json';
+import products from '../demo-data/products.json';
+import locations from '../demo-data/locations.json';
+import stockLedger from '../demo-data/stockledger.json';
 import movements from '../demo-data/movements.json';
 
 @Injectable({
