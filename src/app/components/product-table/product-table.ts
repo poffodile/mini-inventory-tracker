@@ -17,5 +17,13 @@ interface Product {
 })
 export class ProductTable {
   @Input() products: Product[] = [];
+  @Input() filterText: string = ''; //this would take the filter text input from the parent component
+
+  get filteredProducts(): Product[] {
+    if (!this.filterText) return this.products;
+    return this.products.filter((product) =>
+      product.name.toLowerCase().includes(this.filterText.toLowerCase())
+    );
+  }
 }
 // to make the product table reusable, i used the add an @Input() property to accept the product data from the parent component.
