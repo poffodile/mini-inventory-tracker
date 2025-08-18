@@ -1,8 +1,8 @@
-<p>inventory works!</p>
 <div class="p-6 space-y-4">
-  <h1 class="text-2xl font-bold">📦 Product Inventory</h1>
+  <h1 class="text-2xl font-bold">Product Inventory</h1>
+  <app-product-table [products]="products"></app-product-table>
 
-  <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+  <!-- <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
     <thead class="bg-gray-100 text-left">
       <tr>
         <th class="px-4 py-2">Product ID</th>
@@ -21,7 +21,8 @@
     </tbody>
   </table>
 
-  <p *ngIf="products.length === 0" class="text-gray-500">
-    No products found. Load demo data from the dashboard.
-  </p>
+  @if (products.length === 0) {
+  <p class="text-gray-500">No products found. Load demo data from the dashboard.</p>
+  }
+</div> -->
 </div>

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../../services/data';
-
+import { ProductTable } from '../../components/product-table/product-table';
 interface Product {
   id: string;
   name: string;
@@ -11,7 +11,7 @@ interface Product {
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ProductTable],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css',
 })
