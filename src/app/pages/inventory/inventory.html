@@ -1,3 +1,4 @@
+<!-- Search -->
 <div class="p-6 space-y-4">
   <h1 class="text-2xl font-bold">Product Inventory</h1>
   <input
@@ -6,9 +7,53 @@
     [(ngModel)]="filterText"
     class="border px-2 py-1 rounded mb-4"
   />
-  <app-product-table [products]="products" [filterText]="filterText"></app-product-table>
 
-  <!-- <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+  <!--  Advanced Filter -->
+  <div class="flex gap-2">
+    <select title="Filter Field" [(ngModel)]="selectedField" (change)="applyFilters()">
+      <option value="id">Product ID</option>
+      <option value="name">Name</option>
+      <option value="uom">Unit</option>
+      <option value="defaultLocationId">Location</option>
+    </select>
+
+    <input
+      [(ngModel)]="advancedFilterText"
+      (input)="applyFilters()"
+      placeholder="Enter filter..."
+    />
+
+    <input [(ngModel)]="advancedFilterText" placeholder="Enter filter..." />
+
+    <button (click)="applyAdvancedFilter()">Filter</button>
+  </div>
+
+  <!-- Sort Options -->
+  <div class="flex items-center gap-2 mb-4">
+    <label for="sortField">Sort by:</label>
+    <select
+      title="Sort Field"
+      [(ngModel)]="sortField"
+      (change)="applyFilters()"
+      class="border px-2 py-1 rounded"
+    >
+      <option value="">None</option>
+      <option value="id">Product ID</option>
+      <option value="name">Product Name</option>
+      <option value="uom">Unit</option>
+      <option value="defaultLocationId">Location</option>
+    </select>
+
+    <button (click)="toggleSortDirection()" class="px-3 py-1 border rounded bg-gray-100">
+      {{ sortDirection === 'asc' ? ' Ascending' : 'Descending' }}
+    </button>
+  </div>
+
+  <!-- <app-product-table [products]="products" [filterText]="filterText"></app-product-table> -->
+  <app-product-table [products]="filteredProducts"></app-product-table>
+</div>
+
+<!-- <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
     <thead class="bg-gray-100 text-left">
       <tr>
         <th class="px-4 py-2">Product ID</th>
@@ -31,4 +76,3 @@
   <p class="text-gray-500">No products found. Load demo data from the dashboard.</p>
   }
 </div> -->
-</div>

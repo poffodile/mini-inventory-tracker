@@ -4,7 +4,15 @@
   <form (ngSubmit)="submitForm()" class="space-y-4">
     <div>
       <label class="block font-semibold">Product ID</label>
-      <input [(ngModel)]="productId" name="productId" class="border px-2 py-1 w-full" required />
+      <input
+        type="text"
+        [(ngModel)]="productId"
+        name="productId"
+        class="border px-2 py-1 w-full"
+        required
+        title="Product ID"
+        placeholder="Enter product ID"
+      />
     </div>
 
     <div>
@@ -15,12 +23,22 @@
         name="quantity"
         class="border px-2 py-1 w-full"
         required
+        placeholder="Enter quantity received"
+        title="Quantity Received"
       />
     </div>
 
     <div>
       <label class="block font-semibold">Location</label>
-      <input [(ngModel)]="locationId" name="locationId" class="border px-2 py-1 w-full" required />
+      <input
+        type="text"
+        [(ngModel)]="locationId"
+        name="locationId"
+        class="border px-2 py-1 w-full"
+        required
+        placeholder="Enter location ID"
+        title="Location ID"
+      />
     </div>
 
     <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Receive Goods</button>
