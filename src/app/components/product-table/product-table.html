@@ -8,7 +8,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let product of products" class="hover:bg-gray-50">
+    <tr *ngFor="let product of filteredProducts" class="hover:bg-gray-50">
       <td class="px-4 py-2 font-mono">{{ product.id }}</td>
       <td class="px-4 py-2">{{ product.name }}</td>
       <td class="px-4 py-2">{{ product.uom }}</td>
