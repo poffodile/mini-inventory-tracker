@@ -70,7 +70,10 @@ export class Inventory implements OnInit {
 
     // Filter
     let results = this.products.filter((product) => {
-      const matchesSearch = product.name.toLowerCase().includes(searchText);
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchText) ||
+        product.id.toLowerCase().includes(searchText);
+
       const matchesAdvanced = product[selectedField as keyof Product]
         ?.toString()
         .toLowerCase()

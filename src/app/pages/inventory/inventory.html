@@ -5,6 +5,7 @@
     type="text"
     placeholder="Search by name or ID"
     [(ngModel)]="filterText"
+    (input)="applyFilters()"
     class="border px-2 py-1 rounded mb-4"
   />
 
@@ -22,8 +23,6 @@
       (input)="applyFilters()"
       placeholder="Enter filter..."
     />
-
-    <input [(ngModel)]="advancedFilterText" placeholder="Enter filter..." />
 
     <button (click)="applyAdvancedFilter()">Filter</button>
   </div>
@@ -52,27 +51,3 @@
   <!-- <app-product-table [products]="products" [filterText]="filterText"></app-product-table> -->
   <app-product-table [products]="filteredProducts"></app-product-table>
 </div>
-
-<!-- <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
-    <thead class="bg-gray-100 text-left">
-      <tr>
-        <th class="px-4 py-2">Product ID</th>
-        <th class="px-4 py-2">Name</th>
-        <th class="px-4 py-2">Unit</th>
-        <th class="px-4 py-2">Default Location</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let product of products" class="hover:bg-gray-50">
-        <td class="px-4 py-2 font-mono">{{ product.id }}</td>
-        <td class="px-4 py-2">{{ product.name }}</td>
-        <td class="px-4 py-2">{{ product.uom }}</td>
-        <td class="px-4 py-2">{{ product.defaultLocationId || 'Unassigned' }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  @if (products.length === 0) {
-  <p class="text-gray-500">No products found. Load demo data from the dashboard.</p>
-  }
-</div> -->
