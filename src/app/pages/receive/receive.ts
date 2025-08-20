@@ -3,6 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data';
 
+interface ReceivedItem {
+  productId: string;
+  quantity: number;
+  locationId: string;
+  timestamp: string;
+}
+
 @Component({
   selector: 'app-receive',
   standalone: true,
@@ -13,6 +20,7 @@ import { DataService } from '../../services/data';
 export class Receive implements OnInit {
   products: any[] = [];
   locations: any[] = [];
+  receivedItems: ReceivedItem[] = [];
 
   productId: string = '';
   quantity: number = 1;
@@ -26,14 +34,14 @@ export class Receive implements OnInit {
   }
 
   submitForm(): void {
-    const newEntry = {
+    const newEntry: ReceivedItem = {
       productId: this.productId,
       quantity: this.quantity,
       locationId: this.locationId,
       timestamp: new Date().toISOString(),
     };
 
-    const ledger = this.dataService.getData('stockLedger') || [];
+    const ledger: ReceivedItem[] = this.dataService.getData('stockLedger') || [];
     ledger.push(newEntry);
     this.dataService.setData('stockLedger', ledger);
 
