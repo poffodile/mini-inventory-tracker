@@ -1,26 +1,55 @@
-<div class="p-6">
-  <h1 class="text-2xl font-bold mb-4">Stock Received Log</h1>
+<div class="p-6 space-y-4">
+  <h1 class="text-2xl font-bold">Stock Received Log</h1>
 
-  <table class="table-auto w-full border border-collapse">
-    <thead>
-      <tr>
-        <th class="px-4 py-2 text-left cursor-pointer" (click)="sort('productId')">Product ID</th>
-        <th class="px-4 py-2 text-left cursor-pointer" (click)="sort('quantity')">Quantity</th>
-        <th class="px-4 py-2 text-left cursor-pointer" (click)="sort('locationId')">Location</th>
-        <th class="px-4 py-2 text-left cursor-pointer" (click)="sort('timestamp')">Timestamp</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let entry of sortedItems" class="hover:bg-gray-50 text-align:left 4px">
-        <td class="border px-4 py-2">{{ entry.productId }}</td>
-        <td class="border px-4 py-2">{{ entry.quantity }}</td>
-        <td class="border px-4 py-2">{{ entry.locationId }}</td>
-        <td class="border px-4 py-2">{{ entry.timestamp | date : 'medium' }}</td>
-      </tr>
+  <!-- Search -->
+  <div class="max-w-sm">
+    <label class="block text-sm font-medium mb-1">Search (any field)</label>
+    <input
+      [(ngModel)]="searchText"
+      (input)="applySearch()"
+      type="text"
+      class="border rounded px-2 py-1 w-full"
+      placeholder="Try: M001, P001, PO-1001, L001, 2025-08"
+    />
+  </div>
 
-      <p *ngIf="sortedItems.length === 0" class="text-gray-500 mt-4">
-        No stock has been received yet.
-      </p>
-    </tbody>
-  </table>
+  <!-- Simple sort toggle  -->
+  <button
+    class="px-3 py-2 rounded bg-gray-100 border"
+    (click)="toggleSort()"
+    title="Toggle sort by timestamp"
+  >
+    Sort: {{ sortDir === 'desc' ? 'Newest first' : 'Oldest first' }}
+  </button>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 mt-2">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-3 py-2 text-left">ID</th>
+          <th class="px-3 py-2 text-left">Product</th>
+          <th class="px-3 py-2 text-left">To Location</th>
+          <th class="px-3 py-2 text-left">Qty</th>
+          <th class="px-3 py-2 text-left">Ref</th>
+          <th class="px-3 py-2 text-left">Timestamp</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let m of visible" class="hover:bg-gray-50">
+          <td class="border px-3 py-2">{{ m.id }}</td>
+          <td class="border px-3 py-2">{{ m.productId }}</td>
+          <td class="border px-3 py-2">{{ m.toLocationId || '-' }}</td>
+          <td class="border px-3 py-2">{{ m.qty }}</td>
+          <td class="border px-3 py-2">{{ m.ref }}</td>
+          <td class="border px-3 py-2">{{ m.timestamp | date : 'medium' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="visible.length === 0" class="text-gray-500 mt-3">
+      No stock has been received for the current search.
+    </p>
+  </div>
 </div>

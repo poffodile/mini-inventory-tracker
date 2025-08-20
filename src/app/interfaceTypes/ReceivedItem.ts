@@ -2,7 +2,7 @@
 
 export interface ReceivedItem {
   productId: string;
-  quantity: number;
+  //  quantity: number;
   locationId: string;
   timestamp: string;
   toLocationId: string;

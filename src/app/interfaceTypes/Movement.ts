@@ -1,6 +1,6 @@
 export interface Movement {
   id: string;
-  type: 'RECEIPT' | 'PICK' | 'TRANSFER'; // other types if needed
+  type: 'RECEIPT' | 'PICK' | 'TRANSFER';
   productId: string;
   toLocationId?: string; // only present if RECEIPT or TRANSFER
   fromLocationId?: string; // only present if PICK or TRANSFER
