@@ -3,12 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from '../../services/data';
 import { ProductTable } from '../../components/product-table/product-table';
 import { FormsModule } from '@angular/forms';
-interface Product {
-  id: string;
-  name: string;
-  uom: string;
-  defaultLocationId?: string;
-}
+import { Product } from '../../interfaceTypes/Product';
 
 @Component({
   selector: 'app-inventory',

@@ -1,12 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface Product {
-  id: string;
-  name: string;
-  uom: string;
-  defaultLocationId?: string;
-}
+import { Product } from '../../interfaceTypes/Product';
 
 @Component({
   selector: 'app-product-table',

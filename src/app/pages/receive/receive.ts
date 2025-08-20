@@ -2,13 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data';
-
-interface ReceivedItem {
-  productId: string;
-  quantity: number;
-  locationId: string;
-  timestamp: string;
-}
+import { ReceivedItem } from '../../interfaceTypes/ReceivedItem';
 
 @Component({
   selector: 'app-receive',
