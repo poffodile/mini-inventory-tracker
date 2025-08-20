@@ -3,16 +3,13 @@
 
   <form (ngSubmit)="submitForm()" class="space-y-4">
     <div>
-      <label class="block font-semibold">Product ID</label>
-      <input
-        type="text"
-        [(ngModel)]="productId"
-        name="productId"
-        class="border px-2 py-1 w-full"
-        required
-        title="Product ID"
-        placeholder="Enter product ID"
-      />
+      <label class="block font-semibold">Product</label>
+      <select [(ngModel)]="productId" name="productId" class="border px-2 py-1 w-full" required>
+        <option value="" disabled selected>Select a product</option>
+        <option *ngFor="let product of products" [value]="product.id">
+          {{ product.name }} ({{ product.id }})
+        </option>
+      </select>
     </div>
 
     <div>
@@ -23,22 +20,19 @@
         name="quantity"
         class="border px-2 py-1 w-full"
         required
-        placeholder="Enter quantity received"
-        title="Quantity Received"
+        placeholder="Enter quantity"
+        title="Quantity"
       />
     </div>
 
     <div>
       <label class="block font-semibold">Location</label>
-      <input
-        type="text"
-        [(ngModel)]="locationId"
-        name="locationId"
-        class="border px-2 py-1 w-full"
-        required
-        placeholder="Enter location ID"
-        title="Location ID"
-      />
+      <select [(ngModel)]="locationId" name="locationId" class="border px-2 py-1 w-full" required>
+        <option value="" disabled selected>Select a location</option>
+        <option *ngFor="let location of locations" [value]="location.id">
+          {{ location.name }} ({{ location.id }})
+        </option>
+      </select>
     </div>
 
     <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Receive Goods</button>
