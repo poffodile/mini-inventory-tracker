@@ -5,4 +5,7 @@ export interface ReceivedItem {
   quantity: number;
   locationId: string;
   timestamp: string;
+  toLocationId: string;
+  fromLocationId?: string;
+  qty: number;
 }

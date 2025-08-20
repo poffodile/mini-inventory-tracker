@@ -1,7 +1,27 @@
 [
-  { "productId": "P001", "locationId": "LOC01", "qty": 30, "updatedAt": "2025-08-10T08:30:00Z" },
-  { "productId": "P002", "locationId": "LOC02", "qty": 5, "updatedAt": "2025-08-10T09:00:00Z" },
-  { "productId": "P003", "locationId": "LOC03", "qty": 2, "updatedAt": "2025-08-10T10:15:00Z" },
-  { "productId": "P004", "locationId": "LOC01", "qty": 18, "updatedAt": "2025-08-11T14:45:00Z" },
+  {
+    "productId": "P001",
+    "locationId": "LOC01",
+    "qty": 30,
+    "updatedAt": "2025-08-10T08:30:00Z"
+  },
+  {
+    "productId": "P002",
+    "locationId": "LOC02",
+    "qty": 5,
+    "updatedAt": "2025-08-10T09:00:00Z"
+  },
+  {
+    "productId": "P003",
+    "locationId": "LOC03",
+    "qty": 2,
+    "updatedAt": "2025-08-10T10:15:00Z"
+  },
+  {
+    "productId": "P004",
+    "locationId": "LOC01",
+    "qty": 18,
+    "updatedAt": "2025-08-11T14:45:00Z"
+  },
   { "productId": "P005", "locationId": "LOC03", "qty": 1, "updatedAt": "2025-08-11T15:00:00Z" }
 ]

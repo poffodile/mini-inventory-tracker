@@ -33,6 +33,9 @@ export class Receive implements OnInit {
       quantity: this.quantity,
       locationId: this.locationId,
       timestamp: new Date().toISOString(),
+      toLocationId: this.locationId,
+      fromLocationId: undefined,
+      qty: this.quantity,
     };
 
     const ledger: ReceivedItem[] = this.dataService.getData('stockLedger') || [];
