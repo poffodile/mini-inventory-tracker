@@ -1,17 +1,114 @@
-<div class="p-6 space-y-4">
+<div class="p-6 space-y-6">
   <h1 class="text-2xl font-bold">Warehouse Dashboard</h1>
 
-  <button
-    (click)="loadData()"
-    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-  >
-    Load Demo Data
-  </button>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap gap-2">
+    <button
+      (click)="loadDemo()"
+      class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+    >
+      Load Demo Data
+    </button>
+    <button
+      (click)="clearAll()"
+      class="px-3 py-2 bg-amber-500 text-white rounded hover:bg-amber-600"
+    >
+      Clear All
+    </button>
+    <button (click)="exportMovementsJSON()" class="px-3 py-2 bg-gray-100 border rounded">
+      Export Movements (JSON)
+    </button>
+    <button (click)="exportCurrentStockCSV()" class="px-3 py-2 bg-gray-100 border rounded">
+      Export Current Stock (CSV)
+    </button>
+  </div>
 
-  <button
-    (click)="loadData()"
-    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700"
-  >
-    <span> Load Demo Data</span>
-  </button>
+  <!-- Summary cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="p-4 rounded-xl shadow bg-white">
+      <div class="text-sm text-gray-500">Products</div>
+      <div class="text-2xl font-semibold">{{ totalProducts }}</div>
+    </div>
+    <div class="p-4 rounded-xl shadow bg-white">
+      <div class="text-sm text-gray-500">Locations</div>
+      <div class="text-2xl font-semibold">{{ totalLocations }}</div>
+    </div>
+    <div class="p-4 rounded-xl shadow bg-white">
+      <div class="text-sm text-gray-500">Receipts Today</div>
+      <div class="text-2xl font-semibold">{{ receiptsToday }}</div>
+    </div>
+    <div class="p-4 rounded-xl shadow bg-white">
+      <div class="text-sm text-gray-500">Picks Today</div>
+      <div class="text-2xl font-semibold">{{ picksToday }}</div>
+    </div>
+    <div class="p-4 rounded-xl shadow bg-white">
+      <div class="text-sm text-gray-500">Current Stock (sum)</div>
+      <div class="text-2xl font-semibold">{{ currentStockTotal }}</div>
+    </div>
+  </div>
+
+  <!-- Two-up: Recent & Low stock -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="px-4 py-3 border-b font-medium">Recent Activity</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="bg-gray-50 text-left text-sm text-gray-600">
+            <tr>
+              <th class="px-4 py-2">Type</th>
+              <th class="px-4 py-2">Product</th>
+              <th class="px-4 py-2">Location</th>
+              <th class="px-4 py-2">Qty</th>
+              <th class="px-4 py-2">Ref</th>
+              <th class="px-4 py-2">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of recent; track m.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">
+                <span class="text-xs px-2 py-1 rounded" [ngClass]="typeBadgeClasses(m.type)">
+                  {{ m.type }}
+                </span>
+              </td>
+              <td class="px-4 py-2">{{ productName(m.productId) }} ({{ m.productId }})</td>
+              <td class="px-4 py-2">{{ locationName(m.toLocationId) }}</td>
+              <td class="px-4 py-2">{{ m.type === 'PICK' ? '-' : '+' }}{{ m.qty }}</td>
+              <td class="px-4 py-2">{{ m.ref }}</td>
+              <td class="px-4 py-2">{{ m.timestamp | date : 'medium' }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Low Stock Alerts -->
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="px-4 py-3 border-b font-medium">Low Stock (≤ {{ LOW_STOCK_THRESHOLD }})</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="bg-gray-50 text-left text-sm text-gray-600">
+            <tr>
+              <th class="px-4 py-2">Product</th>
+              <th class="px-4 py-2">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of lowStock; track row.productId) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">{{ row.name }} ({{ row.productId }})</td>
+              <td class="px-4 py-2">{{ row.balance }}</td>
+            </tr>
+            } @if (lowStock.length === 0) {
+            <tr>
+              <td class="px-4 py-3 text-gray-500" colspan="2">No low stock items.</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

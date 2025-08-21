@@ -13,6 +13,7 @@ import { DataService } from '../../services/data';
 export class Receive implements OnInit {
   products: Array<{ id: string; name: string }> = [];
   locations: Array<{ id: string; name: string }> = [];
+  receivedItems: any[] = [];
 
   productId = '';
   qty = 1;
