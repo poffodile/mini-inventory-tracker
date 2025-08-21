@@ -58,6 +58,13 @@
           routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Stock Received</a
         >
+        <a
+          routerLink="/current-stock"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+        >
+          Current Stock
+        </a>
       </nav>
 
       <div class="flex items-center gap-2">
@@ -125,6 +132,13 @@
           class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
           >Stock Received</a
         >
+        <a
+          (click)="closeMobile()"
+          routerLink="/current-stock"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          Current Stock
+        </a>
 
         <!-- Theme toggle (mobile) -->
         <button

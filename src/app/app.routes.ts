@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { CurrentStock } from './pages/currentStock/currentStock';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -25,5 +26,10 @@ export const routes: Routes = [
   {
     path: 'stock-received',
     loadComponent: () => import('./pages/stockReceived/stockReceived').then((m) => m.StockReceived),
+  },
+
+  {
+    path: 'current-stock',
+    loadComponent: () => import('./pages/currentStock/currentStock').then((m) => m.CurrentStock),
   },
 ];

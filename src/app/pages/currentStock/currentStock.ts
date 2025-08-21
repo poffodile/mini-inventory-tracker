@@ -11,7 +11,6 @@ type SortKey = 'product' | 'location' | 'qty' | 'updated';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './currentStock.html',
-  styleUrl: './currentStock.css',
 })
 export class CurrentStock implements OnInit {
   // raw ledger rows (1 row per product+location)
@@ -20,6 +19,14 @@ export class CurrentStock implements OnInit {
   // lookups for friendly names
   private productNameById = new Map<string, string>();
   private locationNameById = new Map<string, string>();
+
+  // full stores
+  products: Product[] = [];
+  locations: Array<{ id: string; name: string }> = [];
+
+  // select options (filtered to items that actually appear in the ledger)
+  productOptions: Array<{ id: string; name: string }> = [];
+  locationOptions: Array<{ id: string; name: string }> = [];
 
   // filters
   searchText = '';
@@ -32,23 +39,29 @@ export class CurrentStock implements OnInit {
   // sorting & paging
   sortKey: SortKey = 'product';
   sortDir: 'asc' | 'desc' = 'asc';
-
   page = 1;
   pageSize = 20;
 
-  // derived
+  // derived datasets
   visible: StockLedgerRow[] = []; // when NOT grouped
   grouped: Array<{ productId: string; qty: number; locations: number }> = []; // when grouped
 
   constructor(private data: DataService) {}
 
   ngOnInit(): void {
-    const products = this.data.getData<Product>('products') || [];
-    const locations = this.data.getData<{ id: string; name: string }>('locations') || [];
-    products.forEach((p) => this.productNameById.set(p.id, p.name));
-    locations.forEach((l) => this.locationNameById.set(l.id, l.name));
+    this.products = this.data.getData<Product>('products') || [];
+    this.locations = this.data.getData<{ id: string; name: string }>('locations') || [];
+    this.products.forEach((p) => this.productNameById.set(p.id, p.name));
+    this.locations.forEach((l) => this.locationNameById.set(l.id, l.name));
 
     this.allRows = this.data.getData<StockLedgerRow>('stockLedger') || [];
+
+    // build select options from what actually exists in the ledger
+    const productIdsInLedger = new Set(this.allRows.map((r) => r.productId));
+    const locationIdsInLedger = new Set(this.allRows.map((r) => r.locationId));
+    this.productOptions = this.products.filter((p) => productIdsInLedger.has(p.id));
+    this.locationOptions = this.locations.filter((l) => locationIdsInLedger.has(l.id));
+
     this.applyAll();
   }
 
@@ -87,43 +100,34 @@ export class CurrentStock implements OnInit {
     }
 
     if (this.groupByProduct) {
-      // aggregate by product
       const map = new Map<string, { productId: string; qty: number; locations: number }>();
       for (const r of rows) {
-        const entry = map.get(r.productId) ?? { productId: r.productId, qty: 0, locations: 0 };
-        entry.qty += Number(r.qty) || 0;
-        entry.locations += 1;
-        map.set(r.productId, entry);
+        const e = map.get(r.productId) ?? { productId: r.productId, qty: 0, locations: 0 };
+        e.qty += Number(r.qty) || 0;
+        e.locations += 1;
+        map.set(r.productId, e);
       }
       let grouped = Array.from(map.values());
-
-      // sort aggregated
       grouped = grouped.sort((a, b) => {
         if (this.sortKey === 'qty') return this.numCmp(a.qty, b.qty);
-        // 'product' or default
         return this.strCmp(this.productName(a.productId), this.productName(b.productId));
       });
       if (this.sortDir === 'desc') grouped.reverse();
-
       this.grouped = grouped;
     } else {
-      // sort granular rows
       rows = rows.sort((a, b) => {
         if (this.sortKey === 'qty') return this.numCmp(a.qty, b.qty);
         if (this.sortKey === 'updated')
           return this.numCmp(new Date(a.updatedAt).getTime(), new Date(b.updatedAt).getTime());
         if (this.sortKey === 'location')
           return this.strCmp(this.locationName(a.locationId), this.locationName(b.locationId));
-        // default: product
         return this.strCmp(this.productName(a.productId), this.productName(b.productId));
       });
       if (this.sortDir === 'desc') rows.reverse();
-
       this.visible = rows;
     }
 
-    // reset paging when filters/view change
-    this.page = 1;
+    this.page = 1; // reset paging whenever filters/view change
   }
 
   // hooks
@@ -137,6 +141,15 @@ export class CurrentStock implements OnInit {
   setSort(key: SortKey): void {
     this.sortDir = this.sortKey === key && this.sortDir === 'asc' ? 'desc' : 'asc';
     this.sortKey = key;
+    this.applyAll();
+  }
+  clearFilters(): void {
+    this.searchText = '';
+    this.productFilter = '';
+    this.locationFilter = '';
+    this.groupByProduct = false;
+    this.sortKey = 'product';
+    this.sortDir = 'asc';
     this.applyAll();
   }
 
@@ -171,7 +184,6 @@ export class CurrentStock implements OnInit {
     const url = URL.createObjectURL(blob);
     this.download(url, `current-stock-${this.today()}.json`);
   }
-
   exportCSV(): void {
     if (this.groupByProduct) {
       const header = ['productId', 'productName', 'qty', 'locations'];
@@ -219,5 +231,18 @@ export class CurrentStock implements OnInit {
   }
   private strCmp(a: string, b: string) {
     return String(a).localeCompare(String(b));
+  }
+
+  prevPage() {
+    if (this.page > 1) {
+      this.page--;
+      this.onFiltersChange();
+    }
+  }
+  nextPage() {
+    if (this.page < this.totalPages) {
+      this.page++;
+      this.onFiltersChange?.();
+    }
   }
 }
