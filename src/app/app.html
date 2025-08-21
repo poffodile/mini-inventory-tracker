@@ -6,11 +6,16 @@
 >
 
 <!-- Sticky header -->
-<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b">
+<header
+  class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800"
+>
   <div class="max-w-7xl mx-auto px-4">
     <div class="h-14 flex items-center justify-between gap-4">
       <!-- Brand -->
-      <a routerLink="/dashboard" class="flex items-center gap-2 font-semibold">
+      <a
+        routerLink="/dashboard"
+        class="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100"
+      >
         <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
         <span>Mini Inventory</span>
       </a>
@@ -19,93 +24,129 @@
       <nav class="hidden md:flex items-center gap-1">
         <a
           routerLink="/dashboard"
-          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          class="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Dashboard</a
         >
         <a
           routerLink="/inventory"
-          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
-          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          class="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Inventory</a
         >
         <a
           routerLink="/receive"
-          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
-          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          class="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Receive</a
         >
         <a
           routerLink="/pick"
-          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
-          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          class="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Pick</a
         >
         <a
           routerLink="/import"
-          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
-          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          class="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Import</a
         >
         <a
           routerLink="/stock-received"
-          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
-          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          class="px-3 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          routerLinkActive="text-indigo-600 font-semibold bg-indigo-50 dark:bg-indigo-900/30"
           >Stock Received</a
         >
       </nav>
 
-      <!-- Mobile menu button -->
-      <button
-        (click)="toggleMobile()"
-        class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded hover:bg-gray-100"
-        aria-label="Menu"
-      >
-        <!-- simple hamburger -->
-        <span class="w-5 h-0.5 bg-gray-800 block"></span>
-        <span class="w-5 h-0.5 bg-gray-800 block mt-1.5"></span>
-        <span class="w-5 h-0.5 bg-gray-800 block mt-1.5"></span>
-      </button>
+      <div class="flex items-center gap-2">
+        <!-- Theme toggle -->
+        <button
+          (click)="toggleTheme()"
+          class="hidden md:inline-flex px-3 py-1.5 rounded border bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+        >
+          {{ themeLabel() }}
+        </button>
+
+        <!-- Mobile menu button -->
+        <button
+          (click)="toggleMobile()"
+          class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded hover:bg-gray-100"
+          aria-label="Menu"
+        >
+          <!-- simple hamburger -->
+          <span class="w-5 h-0.5 bg-gray-800 block"></span>
+          <span class="w-5 h-0.5 bg-gray-800 block mt-1.5"></span>
+          <span class="w-5 h-0.5 bg-gray-800 block mt-1.5"></span>
+        </button>
+      </div>
     </div>
+
+    <!-- Mobile nav -->
+    <nav
+      *ngIf="mobileMenuOpen"
+      class="md:hidden border-t bg-white dark:bg-gray-900 dark:text-gray-100"
+    >
+      <div class="px-3 py-2 flex flex-col">
+        <a
+          (click)="closeMobile()"
+          routerLink="/dashboard"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          >Dashboard</a
+        >
+        <a
+          (click)="closeMobile()"
+          routerLink="/inventory"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          >Inventory</a
+        >
+        <a
+          (click)="closeMobile()"
+          routerLink="/receive"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          >Receive</a
+        >
+        <a
+          (click)="closeMobile()"
+          routerLink="/pick"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          >Pick</a
+        >
+        <a
+          (click)="closeMobile()"
+          routerLink="/import"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          >Import</a
+        >
+        <a
+          (click)="closeMobile()"
+          routerLink="/stock-received"
+          class="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+          >Stock Received</a
+        >
+
+        <!-- Theme toggle (mobile) -->
+        <button
+          (click)="toggleTheme()"
+          class="mt-2 px-3 py-2 rounded border bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+        >
+          {{ themeLabel() }}
+        </button>
+      </div>
+    </nav>
+
+    <!-- Page container -->
+    <main id="main" class="max-w-7xl mx-auto px-4 py-6 text-gray-900 dark:text-gray-100">
+      <router-outlet></router-outlet>
+    </main>
+
+    <!-- footer -->
+
+    <footer
+      class="border-t border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
+    >
+      © {{ title() }} · Built with Angular & Tailwind
+    </footer>
   </div>
-
-  <!-- Mobile nav -->
-  @if (mobileOpen()) {
-  <nav class="md:hidden border-t bg-white">
-    <div class="px-3 py-2 flex flex-col">
-      <a (click)="closeMobile()" routerLink="/dashboard" class="px-3 py-2 rounded hover:bg-gray-100"
-        >Dashboard</a
-      >
-      <a (click)="closeMobile()" routerLink="/inventory" class="px-3 py-2 rounded hover:bg-gray-100"
-        >Inventory</a
-      >
-      <a (click)="closeMobile()" routerLink="/receive" class="px-3 py-2 rounded hover:bg-gray-100"
-        >Receive</a
-      >
-      <a (click)="closeMobile()" routerLink="/pick" class="px-3 py-2 rounded hover:bg-gray-100"
-        >Pick</a
-      >
-      <a (click)="closeMobile()" routerLink="/import" class="px-3 py-2 rounded hover:bg-gray-100"
-        >Import</a
-      >
-      <a
-        (click)="closeMobile()"
-        routerLink="/stock-received"
-        class="px-3 py-2 rounded hover:bg-gray-100"
-        >Stock Received</a
-      >
-    </div>
-  </nav>
-  }
 </header>
-
-<!-- Page container -->
-<main id="main" class="max-w-7xl mx-auto px-4 py-6">
-  <router-outlet></router-outlet>
-</main>
-
-<!-- footer -->
-<footer class="border-t py-6 text-center text-sm text-gray-500">
-  © {{ title() }} · Built with Angular & Tailwind
-</footer>

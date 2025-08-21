@@ -1,82 +1,96 @@
-<div class="p-6 space-y-4">
-  <h1 class="text-2xl font-bold">Goods Receipt Form</h1>
+<div class="max-w-2xl p-6 space-y-6">
+  <h1 class="text-2xl font-bold">Goods Receipt</h1>
 
+  <!-- Form -->
   <form (ngSubmit)="submitForm()" class="space-y-4">
     <div>
-      <label class="block font-semibold">Product</label>
+      <label class="block text-sm font-medium mb-1">Product</label>
       <select
         [(ngModel)]="productId"
         name="productId"
-        class="border px-2 py-1 w-full"
+        class="border rounded px-2 py-1 w-full"
         required
         title="Select a product"
       >
         <option value="" disabled selected>Select a product</option>
-        <option *ngFor="let product of products" [value]="product.id">
-          {{ product.name }} ({{ product.id }})
-        </option>
+        <option *ngFor="let p of products" [value]="p.id">{{ p.name }} ({{ p.id }})</option>
       </select>
     </div>
 
     <div>
-      <label class="block font-semibold">Quantity Received</label>
+      <label class="block text-sm font-medium mb-1">Quantity Received</label>
       <input
         type="number"
         [(ngModel)]="qty"
-        name="quantity"
-        class="border px-2 py-1 w-full"
+        name="qty"
+        min="1"
+        class="border rounded px-2 py-1 w-full"
         required
-        placeholder="Enter quantity"
+        placeholder="e.g., 5"
         title="Quantity"
       />
     </div>
 
     <div>
-      <label class="block font-semibold">Location</label>
+      <label class="block text-sm font-medium mb-1">To Location</label>
       <select
         [(ngModel)]="locationId"
         name="locationId"
-        class="border px-2 py-1 w-full"
+        class="border rounded px-2 py-1 w-full"
         required
         title="Select a location"
       >
         <option value="" disabled selected>Select a location</option>
-        <option *ngFor="let location of locations" [value]="location.id">
-          {{ location.name }} ({{ location.id }})
-        </option>
+        <option *ngFor="let l of locations" [value]="l.id">{{ l.name }} ({{ l.id }})</option>
       </select>
     </div>
 
-    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded" [disabled]="!isValid()">
-      Receive Goods
-    </button>
+    <div class="flex gap-2">
+      <button
+        type="submit"
+        class="bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-50"
+        [disabled]="!isValid()"
+      >
+        Receive Goods
+      </button>
+      <button type="button" class="border px-4 py-2 rounded" (click)="resetForm()">Reset</button>
+    </div>
   </form>
-</div>
 
-<!-- Summary Table of Received Goods -->
-<div class="mt-8">
-  <h2 class="text-xl font-semibold mb-2">Received Goods Summary</h2>
+  <!-- Recent Receipts (from movements) -->
+  <div class="mt-6">
+    <h2 class="text-xl font-semibold mb-2">Recent Receipts</h2>
 
-  <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
-    <thead class="bg-gray-100">
-      <tr>
-        <th class="px-4 py-2">Product ID</th>
-        <th class="px-4 py-2">Quantity</th>
-        <th class="px-4 py-2">Location</th>
-        <th class="px-4 py-2">Timestamp</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of receivedItems" class="hover:bg-gray-50">
-        <td class="px-4 py-2">{{ item.productId }}</td>
-        <td class="px-4 py-2">{{ item.qty }}</td>
-        <td class="px-4 py-2">{{ item.locationId }}</td>
-        <td class="px-4 py-2">{{ item.timestamp | date : 'short' }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+        <thead class="bg-gray-100 text-left">
+          <tr>
+            <th class="px-3 py-2">ID</th>
+            <th class="px-3 py-2">Product</th>
+            <th class="px-3 py-2">To Location</th>
+            <th class="px-3 py-2">Qty</th>
+            <th class="px-3 py-2">Ref</th>
+            <th class="px-3 py-2">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of recentReceipts; track m.id) {
+          <tr class="hover:bg-gray-50">
+            <td class="border px-3 py-2">{{ m.id }}</td>
+            <td class="border px-3 py-2">{{ productName(m.productId) }} ({{ m.productId }})</td>
+            <td class="border px-3 py-2">
+              {{ locationName(m.toLocationId) }}
+              <span *ngIf="m.toLocationId">({{ m.toLocationId }})</span>
+            </td>
+            <td class="border px-3 py-2">{{ m.qty }}</td>
+            <td class="border px-3 py-2">{{ m.ref }}</td>
+            <td class="border px-3 py-2">{{ m.timestamp | date : 'medium' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
 
-  @if (receivedItems.length === 0) {
-  <p class="text-gray-500 mt-2">No goods have been received yet.</p>
-  }
+      <p *ngIf="recentReceipts.length === 0" class="text-gray-500 mt-2">No receipts yet.</p>
+    </div>
+  </div>
 </div>

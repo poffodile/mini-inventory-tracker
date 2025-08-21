@@ -1,6 +1,34 @@
 <div class="p-6 space-y-6">
   <h1 class="text-2xl font-bold">Warehouse Dashboard</h1>
 
+  <!-- Quick Actions -->
+  <div class="flex flex-wrap gap-2">
+    <a routerLink="/receive" class="px-3 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+      >Receive Goods</a
+    >
+    <a routerLink="/pick" class="px-3 py-2 rounded bg-rose-600 text-white hover:bg-rose-700"
+      >Dispatch Stock</a
+    >
+    <a
+      routerLink="/stock-received"
+      class="px-3 py-2 rounded bg-gray-100 border hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+    >
+      Stock Received Log
+    </a>
+    <button
+      (click)="exportMovementsJSON()"
+      class="px-3 py-2 rounded bg-gray-100 border hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+    >
+      Export Movements
+    </button>
+    <button
+      (click)="exportCurrentStockCSV()"
+      class="px-3 py-2 rounded bg-gray-100 border hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+    >
+      Export Current Stock
+    </button>
+  </div>
+
   <!-- Toolbar -->
   <div class="flex flex-wrap gap-2">
     <button

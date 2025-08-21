@@ -6,9 +6,15 @@ import movements from '../demo-data/movements.json';
 import { Movement } from '../interfaceTypes/Movement';
 import { ReceivedItem } from '../interfaceTypes/ReceivedItem';
 
-@Injectable({
-  providedIn: 'root',
-})
+/** Balance row kept in stockLedger: one row per product+location */
+export interface StockLedgerRow {
+  productId: string;
+  locationId: string;
+  qty: number;
+  updatedAt: string; // ISO
+}
+
+@Injectable({ providedIn: 'root' })
 export class DataService {
   private keys = {
     products: 'inventory_products',
@@ -17,6 +23,7 @@ export class DataService {
     movements: 'inventory_movements',
   };
 
+  // --- Demo data & general storage helpers ---
   loadDemoData(): void {
     localStorage.setItem(this.keys.products, JSON.stringify(products));
     localStorage.setItem(this.keys.locations, JSON.stringify(locations));
@@ -25,51 +32,71 @@ export class DataService {
     console.log('%c Demo data loaded into LocalStorage!', 'color: green');
   }
 
-  // Load any dataset
   getData<T>(key: keyof typeof this.keys): T[] {
     const raw = localStorage.getItem(this.keys[key]);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as T[];
+    } catch {
+      return [];
+    }
   }
 
-  // Save dataset
   setData<T>(key: keyof typeof this.keys, data: T[]): void {
     localStorage.setItem(this.keys[key], JSON.stringify(data));
   }
 
-  //Clear all demo data
   clearAll(): void {
     Object.values(this.keys).forEach((key) => localStorage.removeItem(key));
     console.log('%c Demo data cleared from LocalStorage!', 'color: orange');
   }
 
+  // --- Movements store helpers (single source of truth for history) ---
   private getMovements(): Movement[] {
     return this.getData<Movement>('movements') || [];
   }
   private setMovements(moves: Movement[]): void {
     this.setData<Movement>('movements', moves);
   }
-
-  // robust M-ID generator: find current max and +1
   private nextMovementId(): string {
-    const moves = this.getMovements();
-    const max = moves
-      .map((m) => Number((m.id || '').replace(/^M/, '')))
+    const max = this.getMovements()
+      .map((m) => Number(String(m.id ?? '').replace(/^M/, '')))
       .filter((n) => !Number.isNaN(n))
       .reduce((a, b) => Math.max(a, b), 0);
     return `M${String(max + 1).padStart(3, '0')}`;
   }
 
+  // --- Stock ledger (balance table) helpers ---
+  private getLedger(): StockLedgerRow[] {
+    return this.getData<StockLedgerRow>('stockLedger') || [];
+  }
+  private setLedger(rows: StockLedgerRow[]): void {
+    this.setData<StockLedgerRow>('stockLedger', rows);
+  }
+  /** Add or subtract qty for a product at a location (delta can be + or -). */
+  private upsertLedger(productId: string, locationId: string, deltaQty: number, nowIso: string) {
+    const ledger = this.getLedger();
+    const i = ledger.findIndex((r) => r.productId === productId && r.locationId === locationId);
+    if (i === -1) {
+      ledger.push({ productId, locationId, qty: Math.max(0, deltaQty), updatedAt: nowIso });
+    } else {
+      ledger[i].qty = Math.max(0, (Number(ledger[i].qty) || 0) + deltaQty);
+      ledger[i].updatedAt = nowIso;
+    }
+    this.setLedger(ledger);
+  }
+
+  // --- Public API: business actions ---
   /**
-   * Record a goods receipt in BOTH ledgers:
-   * - stockLedger (ReceivedItem)
-   * - movements (Movement with type=RECEIPT)
-   *
-   * Returns both objects for UI use if needed.
+   * Record a goods receipt:
+   * - movements: add type=RECEIPT
+   * - stockLedger: increment balance at toLocationId
+   * (I’m not storing a ReceivedItem[]; the historical log lives in movements)
    */
   recordReceipt(input: { productId: string; qty: number; toLocationId: string; ref?: string }) {
     const now = new Date().toISOString();
 
-    // prepare ReceivedItem (qty only)
+    // (For forms/typing clarity, this is how the ReceivedItem looks)
     const received: ReceivedItem = {
       productId: input.productId,
       qty: input.qty,
@@ -79,12 +106,7 @@ export class DataService {
       fromLocationId: undefined,
     };
 
-    // save to stockLedger
-    const ledger = this.getData<ReceivedItem>('stockLedger') || [];
-    ledger.push(received);
-    this.setData<ReceivedItem>('stockLedger', ledger);
-
-    // prepare Movement log
+    // 1) movements log
     const movement: Movement = {
       id: this.nextMovementId(),
       type: 'RECEIPT',
@@ -94,12 +116,68 @@ export class DataService {
       ref: input.ref ?? `GRN-${now.slice(0, 10)}`,
       timestamp: now,
     };
-
     const moves = this.getMovements();
     moves.push(movement);
     this.setMovements(moves);
 
+    // 2) stockLedger balance (add)
+    this.upsertLedger(input.productId, input.toLocationId, +input.qty, now);
+
     return { received, movement };
+  }
+
+  /** Available stock at a location, derived from movements (RECEIPT - PICK). */
+  getAvailableAt(productId: string, locationId: string): number {
+    const moves = this.getMovements();
+    const inQty = moves
+      .filter(
+        (m) => m.type === 'RECEIPT' && m.productId === productId && m.toLocationId === locationId
+      )
+      .reduce((s, m) => s + (m.qty ?? 0), 0);
+    const outQty = moves
+      .filter(
+        (m) => m.type === 'PICK' && m.productId === productId && m.fromLocationId === locationId
+      )
+      .reduce((s, m) => s + (m.qty ?? 0), 0);
+    return inQty - outQty;
+  }
+
+  /**
+   * Record a stock dispatch (pick):
+   * - validates availability
+   * - movements: add type=PICK
+   * - stockLedger: decrement balance at fromLocationId
+   */
+  recordPick(input: { productId: string; qty: number; fromLocationId: string; ref?: string }) {
+    const { productId, qty, fromLocationId } = input;
+    const now = new Date().toISOString();
+
+    if (!productId || !fromLocationId || !Number.isFinite(qty) || qty <= 0) {
+      return { ok: false, error: 'Please provide product, location, and a quantity > 0.' as const };
+    }
+
+    const available = this.getAvailableAt(productId, fromLocationId);
+    if (qty > available) {
+      return { ok: false, error: `Only ${available} available at ${fromLocationId}.` as const };
+    }
+
+    const movement: Movement = {
+      id: this.nextMovementId(),
+      type: 'PICK',
+      productId,
+      fromLocationId,
+      qty,
+      ref: input.ref ?? `DISP-${now.slice(0, 10)}`,
+      timestamp: now,
+    };
+    const moves = this.getMovements();
+    moves.push(movement);
+    this.setMovements(moves);
+
+    // decrement ledger at the fromLocation
+    this.upsertLedger(productId, fromLocationId, -qty, now);
+
+    return { ok: true, movement };
   }
 }
 

@@ -1,1 +1,88 @@
-<p>pick works!</p>
+<div class="max-w-2xl p-6 space-y-6">
+  <h1 class="text-2xl font-bold">Dispatch Stock (Pick)</h1>
+
+  <form (ngSubmit)="submit()" class="space-y-4">
+    <!-- Product -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Product</label>
+      <select
+        [(ngModel)]="productId"
+        name="productId"
+        class="border rounded w-full px-2 py-1"
+        (change)="onFieldChange()"
+        required
+        placeholder="Select a product"
+        aria-label="Product"
+      >
+        <option value="" disabled selected>Select a product</option>
+        <option *ngFor="let p of products" [value]="p.id">{{ p.name }} ({{ p.id }})</option>
+      </select>
+    </div>
+
+    <!-- From Location -->
+    <div>
+      <label class="block text-sm font-medium mb-1">From Location</label>
+      <select
+        [(ngModel)]="fromLocationId"
+        name="fromLocationId"
+        class="border rounded w-full px-2 py-1"
+        (change)="onFieldChange()"
+        required
+        placeholder="Select a location"
+        aria-label="From Location"
+      >
+        <option value="" disabled selected>Select a location</option>
+        <option *ngFor="let l of locations" [value]="l.id">{{ l.name }} ({{ l.id }})</option>
+      </select>
+
+      <p class="text-sm text-gray-600 mt-1" *ngIf="productId && fromLocationId">
+        Available here: <span class="font-medium">{{ available }}</span>
+      </p>
+    </div>
+
+    <!-- Quantity -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Quantity to Dispatch</label>
+      <input
+        type="number"
+        [(ngModel)]="qty"
+        name="qty"
+        min="1"
+        class="border rounded w-full px-2 py-1"
+        (input)="onFieldChange()"
+        required
+        placeholder="e.g., 3"
+      />
+      <p *ngIf="qty > available && available >= 0" class="text-rose-600 text-sm mt-1">
+        You’re trying to dispatch more than available.
+      </p>
+    </div>
+
+    <!-- Optional Reference -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Reference (optional)</label>
+      <input
+        type="text"
+        [(ngModel)]="ref"
+        name="ref"
+        class="border rounded w-full px-2 py-1"
+        placeholder="e.g., ORD-9002"
+      />
+    </div>
+
+    <!-- Errors -->
+    <div *ngIf="errorMsg" class="text-rose-600 text-sm">{{ errorMsg }}</div>
+
+    <!-- Actions -->
+    <div class="flex gap-2">
+      <button
+        type="submit"
+        class="bg-rose-600 text-white px-4 py-2 rounded disabled:opacity-50"
+        [disabled]="!isValid() || qty > available"
+      >
+        Dispatch Stock
+      </button>
+      <button type="button" class="border px-4 py-2 rounded" (click)="reset()">Reset</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,148 @@
+<div class="p-6 space-y-6">
+  <h1 class="text-2xl font-bold">Current Stock</h1>
+
+  <!-- Filters / actions -->
+  <div class="grid grid-cols-1 md:grid-cols-6 gap-3 max-w-7xl items-end">
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium mb-1">Search</label>
+      <input
+        [(ngModel)]="searchText"
+        (input)="onFiltersChange()"
+        type="text"
+        class="border rounded px-2 py-1 w-full"
+        placeholder="Search product, location, qty..."
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Product</label>
+      <select
+        [(ngModel)]="productFilter"
+        (change)="onFiltersChange()"
+        class="border rounded px-2 py-1 w-full"
+      >
+        <option value="">All products</option>
+        <!-- Show products present in ledger via lookups (IDs only; names appear in table) -->
+        <!-- (You can prefill from products list as well) -->
+        <!-- Simpler: let users filter by typing above; dropdown is optional -->
+        <!-- Keep empty for now or populate from products if you prefer -->
+        <!-- Intentionally left generic -->
+        <option *ngFor="let r of allRows | slice : 0 : 1"></option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Location</label>
+      <select
+        [(ngModel)]="locationFilter"
+        (change)="onFiltersChange()"
+        class="border rounded px-2 py-1 w-full"
+      >
+        <option value="">All locations</option>
+        <!-- Same note as Product; feel free to populate from locations store -->
+        <option *ngFor="let r of allRows | slice : 0 : 1"></option>
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input id="grp" type="checkbox" [(ngModel)]="groupByProduct" (change)="toggleGroup()" />
+      <label for="grp" class="text-sm">Group by product</label>
+    </div>
+
+    <div class="flex gap-2 justify-end">
+      <button class="px-3 py-2 rounded bg-gray-100 border" (click)="exportJSON()">
+        Export JSON
+      </button>
+      <button class="px-3 py-2 rounded bg-gray-100 border" (click)="exportCSV()">Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 mt-2">
+      <thead class="bg-gray-100">
+        <tr *ngIf="!groupByProduct">
+          <th class="px-3 py-2 text-left cursor-pointer" (click)="setSort('product')">
+            Product
+            <span class="text-xs" *ngIf="sortKey === 'product'">({{ sortDir }})</span>
+          </th>
+          <th class="px-3 py-2 text-left cursor-pointer" (click)="setSort('location')">
+            Location
+            <span class="text-xs" *ngIf="sortKey === 'location'">({{ sortDir }})</span>
+          </th>
+          <th class="px-3 py-2 text-left cursor-pointer" (click)="setSort('qty')">
+            Qty
+            <span class="text-xs" *ngIf="sortKey === 'qty'">({{ sortDir }})</span>
+          </th>
+          <th class="px-3 py-2 text-left cursor-pointer" (click)="setSort('updated')">
+            Updated
+            <span class="text-xs" *ngIf="sortKey === 'updated'">({{ sortDir }})</span>
+          </th>
+        </tr>
+
+        <tr *ngIf="groupByProduct">
+          <th class="px-3 py-2 text-left cursor-pointer" (click)="setSort('product')">
+            Product
+            <span class="text-xs" *ngIf="sortKey === 'product'">({{ sortDir }})</span>
+          </th>
+          <th class="px-3 py-2 text-left cursor-pointer" (click)="setSort('qty')">
+            Qty (total)
+            <span class="text-xs" *ngIf="sortKey === 'qty'">({{ sortDir }})</span>
+          </th>
+          <th class="px-3 py-2 text-left">Locations</th>
+        </tr>
+      </thead>
+
+      <tbody *ngIf="!groupByProduct">
+        @for (r of pageRows; track r.productId + '|' + r.locationId) {
+        <tr class="hover:bg-gray-50">
+          <td class="border px-3 py-2">{{ productName(r.productId) }} ({{ r.productId }})</td>
+          <td class="border px-3 py-2">{{ locationName(r.locationId) }} ({{ r.locationId }})</td>
+          <td class="border px-3 py-2">{{ r.qty }}</td>
+          <td class="border px-3 py-2">{{ r.updatedAt | date : 'medium' }}</td>
+        </tr>
+        }
+      </tbody>
+
+      <tbody *ngIf="groupByProduct">
+        @for (g of pageRows; track g.productId) {
+        <tr class="hover:bg-gray-50">
+          <td class="border px-3 py-2">{{ productName(g.productId) }} ({{ g.productId }})</td>
+          <td class="border px-3 py-2">{{ g.qty }}</td>
+          <td class="border px-3 py-2">{{ g.locations }}</td>
+        </tr>
+        }
+      </tbody>
+
+      <tfoot>
+        <tr class="bg-gray-50 font-medium">
+          <td class="border px-3 py-2" [attr.colspan]="groupByProduct ? 1 : 2">Totals (visible)</td>
+          <td class="border px-3 py-2">{{ totalQtyPage }}</td>
+          <td class="border px-3 py-2" *ngIf="!groupByProduct"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Pagination -->
+    <div class="flex items-center gap-3 mt-3">
+      <button class="px-3 py-1 border rounded" (click)="page = Math.max(1, page - 1)">Prev</button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button class="px-3 py-1 border rounded" (click)="page = Math.min(totalPages, page + 1)">
+        Next
+      </button>
+
+      <span class="ml-4">Rows per page:</span>
+      <select [(ngModel)]="pageSize" (change)="page = 1" class="border rounded px-2 py-1">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
+
+      <span class="ml-auto text-sm text-gray-600">
+        Showing {{ pageRows.length }} of {{ totalRows }} (qty on page: {{ totalQtyPage }}, qty
+        total: {{ totalQtyVisible }})
+      </span>
+    </div>
+  </div>
+</div>
