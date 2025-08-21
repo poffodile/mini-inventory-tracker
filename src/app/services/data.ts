@@ -3,6 +3,8 @@ import products from '../demo-data/products.json';
 import locations from '../demo-data/locations.json';
 import stockLedger from '../demo-data/stockledger.json';
 import movements from '../demo-data/movements.json';
+import { Movement } from '../interfaceTypes/Movement';
+import { ReceivedItem } from '../interfaceTypes/ReceivedItem';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +40,66 @@ export class DataService {
   clearAll(): void {
     Object.values(this.keys).forEach((key) => localStorage.removeItem(key));
     console.log('%c Demo data cleared from LocalStorage!', 'color: orange');
+  }
+
+  private getMovements(): Movement[] {
+    return this.getData<Movement>('movements') || [];
+  }
+  private setMovements(moves: Movement[]): void {
+    this.setData<Movement>('movements', moves);
+  }
+
+  // robust M-ID generator: find current max and +1
+  private nextMovementId(): string {
+    const moves = this.getMovements();
+    const max = moves
+      .map((m) => Number((m.id || '').replace(/^M/, '')))
+      .filter((n) => !Number.isNaN(n))
+      .reduce((a, b) => Math.max(a, b), 0);
+    return `M${String(max + 1).padStart(3, '0')}`;
+  }
+
+  /**
+   * Record a goods receipt in BOTH ledgers:
+   * - stockLedger (ReceivedItem)
+   * - movements (Movement with type=RECEIPT)
+   *
+   * Returns both objects for UI use if needed.
+   */
+  recordReceipt(input: { productId: string; qty: number; toLocationId: string; ref?: string }) {
+    const now = new Date().toISOString();
+
+    // prepare ReceivedItem (qty only)
+    const received: ReceivedItem = {
+      productId: input.productId,
+      qty: input.qty,
+      locationId: input.toLocationId,
+      toLocationId: input.toLocationId,
+      timestamp: now,
+      fromLocationId: undefined,
+    };
+
+    // save to stockLedger
+    const ledger = this.getData<ReceivedItem>('stockLedger') || [];
+    ledger.push(received);
+    this.setData<ReceivedItem>('stockLedger', ledger);
+
+    // prepare Movement log
+    const movement: Movement = {
+      id: this.nextMovementId(),
+      type: 'RECEIPT',
+      productId: input.productId,
+      toLocationId: input.toLocationId,
+      qty: input.qty,
+      ref: input.ref ?? `GRN-${now.slice(0, 10)}`,
+      timestamp: now,
+    };
+
+    const moves = this.getMovements();
+    moves.push(movement);
+    this.setMovements(moves);
+
+    return { received, movement };
   }
 }
 
