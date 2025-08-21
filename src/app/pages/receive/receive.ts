@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data';
-import { ReceivedItem } from '../../interfaceTypes/ReceivedItem';
-import { Movement } from '../../interfaceTypes/Movement';
 
 @Component({
   selector: 'app-receive',
@@ -13,78 +11,51 @@ import { Movement } from '../../interfaceTypes/Movement';
   styleUrls: ['./receive.css'],
 })
 export class Receive implements OnInit {
-  products: any[] = [];
-  locations: any[] = [];
-  receivedItems: ReceivedItem[] = [];
+  products: Array<{ id: string; name: string }> = [];
+  locations: Array<{ id: string; name: string }> = [];
 
-  productId: string = '';
-  qty: number = 1;
-  locationId: string = '';
+  productId = '';
+  qty = 1;
+  locationId = '';
 
   constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
-    // Loads the products and locations from the data service(localStorage)
+    // load dropdowns
     this.products = this.dataService.getData('products') || [];
     this.locations = this.dataService.getData('locations') || [];
   }
 
+  // tiny guard so I can’t save nonsense (my “baby words” version)
+  isValid(): boolean {
+    const hasProduct = !!this.productId && this.products.some((p) => p.id === this.productId);
+    const hasLocation = !!this.locationId && this.locations.some((l) => l.id === this.locationId);
+    const goodQty = Number.isFinite(this.qty) && this.qty > 0;
+    return hasProduct && hasLocation && goodQty;
+  }
+
   submitForm(): void {
-    const now = new Date().toISOString();
+    if (!this.isValid()) {
+      alert('Please pick a product, a location, and a quantity > 0.');
+      return;
+    }
 
-    // Create a new received item entry
-    const newEntry: ReceivedItem = {
+    // one call: writes to stockLedger + movements (RECEIPT)
+    this.dataService.recordReceipt({
       productId: this.productId,
       qty: this.qty,
-      locationId: this.locationId,
-      timestamp: now,
       toLocationId: this.locationId,
-      fromLocationId: undefined,
-    };
-
-    //save to stockledger
-
-    const ledger: ReceivedItem[] = this.dataService.getData('stockLedger') || [];
-    ledger.push(newEntry);
-    this.dataService.setData('stockLedger', ledger);
-
-    // Create a new movement entry of type RECEIPT
-    const existingMovements: Movement[] = this.dataService.getData('movements') || [];
-    const newId = this.generateMovementId(existingMovements.length); // auto ID like M001
-
-    const movement: Movement = {
-      id: newId,
-      type: 'RECEIPT',
-      productId: this.productId,
-      toLocationId: this.locationId,
-      qty: this.qty,
-      // Creates a reference like GRN-2025-08-20
-      // now.slice(0, 10) just takes the "YYYY-MM-DD" part of the ISO date
-      ref: `GRN-${now.slice(0, 10)}`, // like GRN-2025-08-20
-      timestamp: now,
-      fromLocationId: undefined,
-      // ref: newEntry.timestamp,
-      // timestamp: newEntry.timestamp,
-    };
-
-    existingMovements.push(movement);
-    this.dataService.setData('movements', existingMovements);
+      // optional human ref; default looks like GRN-YYYY-MM-DD
+      // ref: `GRN-${new Date().toISOString().slice(0,10)}`
+    });
 
     alert('Goods received and movement logged!');
     this.resetForm();
   }
 
   resetForm(): void {
-    // Clear the form so the user can enter another
     this.productId = '';
     this.qty = 1;
     this.locationId = '';
-  }
-
-  generateMovementId(count: number): string {
-    // Always start with "M" and pad with 0s like M001, M002, etc
-    // Generates IDs like M001, M002, etc.
-    // padStart(3, '0') means: always keep 3 digits by adding leading zeros
-    return `M${(count + 1).toString().padStart(3, '0')}`;
   }
 }
