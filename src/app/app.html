@@ -1,10 +1,111 @@
-<h1 class="text-3xl font-bold underline text-blue-700 bg-amber-500">Hello world!</h1>
-<nav class="flex gap-4 p-4 bg-gray-100">
-  <a routerLink="/dashboard" class="text-blue-600">Dashboard</a>
-  <a routerLink="/inventory" class="text-green-600">Inventory</a>
-  <a routerLink="/receive" class="text-red-600">Receive</a>
-  <a routerLink="/pick" class="text-purple-600">Pick</a>
-  <a routerLink="/import" class="text-orange-600">Import</a>
-</nav>
+<!-- Accessible skip link -->
+<a
+  href="#main"
+  class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-black text-white px-3 py-2 rounded"
+  >Skip to content</a
+>
 
-<router-outlet></router-outlet>
+<!-- Sticky header -->
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="h-14 flex items-center justify-between gap-4">
+      <!-- Brand -->
+      <a routerLink="/dashboard" class="flex items-center gap-2 font-semibold">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+        <span>Mini Inventory</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-1">
+        <a
+          routerLink="/dashboard"
+          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          >Dashboard</a
+        >
+        <a
+          routerLink="/inventory"
+          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          >Inventory</a
+        >
+        <a
+          routerLink="/receive"
+          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          >Receive</a
+        >
+        <a
+          routerLink="/pick"
+          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          >Pick</a
+        >
+        <a
+          routerLink="/import"
+          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          >Import</a
+        >
+        <a
+          routerLink="/stock-received"
+          [routerLinkActive]="['text-indigo-600', 'font-semibold', 'bg-indigo-50']"
+          class="px-3 py-1.5 rounded hover:bg-gray-100"
+          >Stock Received</a
+        >
+      </nav>
+
+      <!-- Mobile menu button -->
+      <button
+        (click)="toggleMobile()"
+        class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded hover:bg-gray-100"
+        aria-label="Menu"
+      >
+        <!-- simple hamburger -->
+        <span class="w-5 h-0.5 bg-gray-800 block"></span>
+        <span class="w-5 h-0.5 bg-gray-800 block mt-1.5"></span>
+        <span class="w-5 h-0.5 bg-gray-800 block mt-1.5"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  @if (mobileOpen()) {
+  <nav class="md:hidden border-t bg-white">
+    <div class="px-3 py-2 flex flex-col">
+      <a (click)="closeMobile()" routerLink="/dashboard" class="px-3 py-2 rounded hover:bg-gray-100"
+        >Dashboard</a
+      >
+      <a (click)="closeMobile()" routerLink="/inventory" class="px-3 py-2 rounded hover:bg-gray-100"
+        >Inventory</a
+      >
+      <a (click)="closeMobile()" routerLink="/receive" class="px-3 py-2 rounded hover:bg-gray-100"
+        >Receive</a
+      >
+      <a (click)="closeMobile()" routerLink="/pick" class="px-3 py-2 rounded hover:bg-gray-100"
+        >Pick</a
+      >
+      <a (click)="closeMobile()" routerLink="/import" class="px-3 py-2 rounded hover:bg-gray-100"
+        >Import</a
+      >
+      <a
+        (click)="closeMobile()"
+        routerLink="/stock-received"
+        class="px-3 py-2 rounded hover:bg-gray-100"
+        >Stock Received</a
+      >
+    </div>
+  </nav>
+  }
+</header>
+
+<!-- Page container -->
+<main id="main" class="max-w-7xl mx-auto px-4 py-6">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- footer -->
+<footer class="border-t py-6 text-center text-sm text-gray-500">
+  © {{ title() }} · Built with Angular & Tailwind
+</footer>
