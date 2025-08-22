@@ -30,6 +30,7 @@ export class DataService {
     localStorage.setItem(this.keys.stockLedger, JSON.stringify(stockLedger));
     localStorage.setItem(this.keys.movements, JSON.stringify(movements));
     console.log('%c Demo data loaded into LocalStorage!', 'color: green');
+    this.refreshLookups();
   }
 
   getData<T>(key: keyof typeof this.keys): T[] {
@@ -49,6 +50,7 @@ export class DataService {
   clearAll(): void {
     Object.values(this.keys).forEach((key) => localStorage.removeItem(key));
     console.log('%c Demo data cleared from LocalStorage!', 'color: orange');
+    this.refreshLookups();
   }
 
   // --- Movements store helpers (single source of truth for history) ---
@@ -178,6 +180,36 @@ export class DataService {
     this.upsertLedger(productId, fromLocationId, -qty, now);
 
     return { ok: true, movement };
+  }
+
+  // --- Lookup caches ---
+  private productMap?: Map<string, string>;
+  private locationMap?: Map<string, string>;
+
+  /** Reset caches (call this after loading/clearing/importing data) */
+  refreshLookups(): void {
+    this.productMap = undefined;
+    this.locationMap = undefined;
+  }
+
+  /** Get human-friendly product name by id (falls back to id) */
+  productName(id?: string): string {
+    if (!id) return '-';
+    if (!this.productMap) {
+      const products = this.getData<{ id: string; name: string }>('products') || [];
+      this.productMap = new Map(products.map((p) => [p.id, p.name]));
+    }
+    return this.productMap.get(id) ?? id;
+  }
+
+  /** Get human-friendly location name by id (falls back to id) */
+  locationName(id?: string): string {
+    if (!id) return '-';
+    if (!this.locationMap) {
+      const locations = this.getData<{ id: string; name: string }>('locations') || [];
+      this.locationMap = new Map(locations.map((l) => [l.id, l.name]));
+    }
+    return this.locationMap.get(id) ?? id;
   }
 }
 
