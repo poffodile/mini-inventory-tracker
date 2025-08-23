@@ -32,16 +32,31 @@
   </div>
 
   <!-- ===== KPI STRIP (DaisyUI stats) ===== -->
-  <div class="w-full shadow stats stats-vertical lg:stats-horizontal bg-base-100">
+  <div
+    class="grid w-full grid-cols-1 gap-4 p-6 shadow stats stats-vertical lg:stats-horizontal bg-base-100 md:grid-cols-3 lg:grid-cols-5"
+  >
     <!-- products -->
-    <div class="stat">
-      <div class="stat-title">Products</div>
-      <div class="stat-value">{{ totalProducts }}</div>
+    <div class="p-4 shadow stat radius-4 bg-base-200 rounded-box">
+      <div class="text-sm stat-title text-neutral-content">Products</div>
+      <div class="text-2xl font-semibold stat-value text-base-content">{{ totalProducts }}</div>
     </div>
     <!-- locations -->
-    <div class="stat">
-      <div class="stat-title">Locations</div>
-      <div class="stat-value">{{ totalLocations }}</div>
+    <div class="relative p-4 shadow stat bg-base-200 rounded-box">
+      <!-- first icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        class="absolute size-6 stroke-accent fill-success top-4 right-4"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      <div class="text-sm stat-title text-neutral-content">Locations</div>
+      <div class="text-2xl font-semibold stat-value text-base-content">{{ totalLocations }}</div>
     </div>
     <!-- receipts today -->
     <div class="stat">

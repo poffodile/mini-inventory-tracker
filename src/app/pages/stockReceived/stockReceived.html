@@ -1,124 +1,61 @@
-<div class="p-6 space-y-4">
-  <h1 class="text-2xl font-bold">Stock Received Log</h1>
-
-  <!-- Filters -->
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-3 max-w-5xl items-end">
-    <div class="">
-      <label class="block text-sm font-medium mb-1">Search (any field)</label>
-      <input
-        [(ngModel)]="searchText"
-        (input)="applySearch()"
-        type="text"
-        class="border rounded px-2 py-1 w-full"
-        placeholder="Try: M001, P001, PO-10001, LOC01, 2025-08"
-      />
-    </div>
-
-    <div>
-      <label class="block text-sm font-medium mb-1">From (date)</label>
-      <input
-        type="date"
-        [(ngModel)]="dateFrom"
-        (change)="applySearch()"
-        class="border rounded px-2 py-1 w-full"
-        placeholder="Select start date"
-        title="From date"
-      />
-    </div>
-
-    <div>
-      <label class="block text-sm font-medium mb-1">To (date)</label>
-      <input
-        type="date"
-        [(ngModel)]="dateTo"
-        (change)="applySearch()"
-        class="border rounded px-2 py-1 w-full"
-        placeholder="Select end date"
-        title="To date"
-      />
-    </div>
-
-    <div class="flex gap-2">
-      <button
-        class="px-3 py-2 rounded bg-gray-100 border"
-        (click)="toggleSort()"
-        title="Toggle sort by timestamp"
-      >
+<!-- ========= PAGE: STOCK RECEIVED LOG ========= -->
+<div class="space-y-4">
+  <!-- Header -->
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Stock Received</h1>
+    <div class="join">
+      <button class="btn btn-outline btn-sm join-item" (click)="toggleSort()">
         Sort: {{ sortDir === 'desc' ? 'Newest first' : 'Oldest first' }}
       </button>
     </div>
+  </header>
 
-    <div class="flex gap-2 justify-end">
-      <button class="px-3 py-2 rounded bg-gray-100 border" (click)="exportJSON(false)">
-        Export JSON
-      </button>
-      <button class="px-3 py-2 rounded bg-gray-100 border" (click)="exportCSV(false)">
-        Export CSV
-      </button>
-    </div>
+  <!-- Search -->
+  <div class="max-w-sm">
+    <label class="form-control">
+      <span class="label-text">Search (ID, product, location, ref…)</span>
+      <input
+        [(ngModel)]="searchText"
+        (input)="onSearchInput()"
+        type="text"
+        class="input input-bordered"
+        placeholder="e.g. M001 or 2025-08"
+      />
+    </label>
   </div>
 
   <!-- Table -->
-  <div class="overflow-x-auto">
-    <table class="min-w-full border border-gray-300 mt-2">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="px-3 py-2 text-left">ID</th>
-          <th class="px-3 py-2 text-left">Product</th>
-          <th class="px-3 py-2 text-left">To Location</th>
-          <th class="px-3 py-2 text-left">Qty</th>
-          <th class="px-3 py-2 text-left">Ref</th>
-          <th class="px-3 py-2 text-left">Timestamp</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        @for (m of paged; track m.id) {
-        <tr class="hover:bg-gray-50">
-          <td class="border px-3 py-2">{{ m.id }}</td>
-          <td class="border px-3 py-2">{{ productName(m.productId) }} ({{ m.productId }})</td>
-          <td class="border px-3 py-2">
-            {{ locationName(m.toLocationId) }}
-            <span *ngIf="m.toLocationId">({{ m.toLocationId }})</span>
-          </td>
-          <td class="border px-3 py-2">{{ m.qty }}</td>
-          <td class="border px-3 py-2">{{ m.ref }}</td>
-          <td class="border px-3 py-2">{{ m.timestamp | date : 'medium' }}</td>
-        </tr>
-        }
-      </tbody>
-
-      <tfoot>
-        <tr class="bg-gray-50 font-medium">
-          <td class="border px-3 py-2" colspan="3">Total (visible filters)</td>
-          <td class="border px-3 py-2">{{ totalQtyVisible }}</td>
-          <td class="border px-3 py-2" colspan="2"></td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <!-- Pagination -->
-    <div class="flex items-center gap-3 mt-3">
-      <button class="px-3 py-1 border rounded" (click)="prevPage()">Prev</button>
-      <span>Page {{ page }} of {{ totalPages }}</span>
-      <button class="px-3 py-1 border rounded" (click)="nextPage()">Next</button>
-
-      <span class="ml-4">Rows per page:</span>
-      <select
-        [(ngModel)]="pageSize"
-        (change)="page = 1"
-        class="border rounded px-2 py-1"
-        title="Rows per page"
-      >
-        <option [ngValue]="10">10</option>
-        <option [ngValue]="20">20</option>
-        <option [ngValue]="50">50</option>
-        <option [ngValue]="100">100</option>
-      </select>
-
-      <span class="ml-auto text-sm text-gray-600">
-        Showing {{ paged.length }} of {{ visible.length }} (qty on page: {{ totalQtyPage }})
-      </span>
+  <section class="shadow card bg-base-100">
+    <div class="card-body">
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product</th>
+              <th>To Location</th>
+              <th>Qty</th>
+              <th>Ref</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of visible; track m.id) {
+            <tr>
+              <td>{{ m.id }}</td>
+              <td>
+                {{ productName(m.productId) }} <span class="opacity-60">({{ m.productId }})</span>
+              </td>
+              <td>{{ locationName(m.toLocationId) }}</td>
+              <td>{{ m.qty }}</td>
+              <td>{{ m.ref }}</td>
+              <td>{{ m.timestamp | date : 'medium' }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        <div *ngIf="visible.length === 0" class="mt-3 alert"><span>No matches.</span></div>
+      </div>
     </div>
-  </div>
+  </section>
 </div>

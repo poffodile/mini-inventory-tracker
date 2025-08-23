@@ -1,88 +1,88 @@
-<div class="max-w-2xl p-6 space-y-6">
-  <h1 class="text-2xl font-bold">Dispatch Stock (Pick)</h1>
+<!-- ========= PAGE: DISPATCH / PICK ========= -->
+<div class="max-w-2xl space-y-6">
+  <!-- Page header -->
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Dispatch Stock</h1>
+    <a routerLink="/current-stock" class="btn btn-outline btn-sm">Check Stock</a>
+  </header>
 
-  <form (ngSubmit)="submit()" class="space-y-4">
-    <!-- Product -->
-    <div>
-      <label class="block text-sm font-medium mb-1">Product</label>
-      <select
-        [(ngModel)]="productId"
-        name="productId"
-        class="border rounded w-full px-2 py-1"
-        (change)="onFieldChange()"
-        required
-        placeholder="Select a product"
-        aria-label="Product"
-      >
-        <option value="" disabled selected>Select a product</option>
-        <option *ngFor="let p of products" [value]="p.id">{{ p.name }} ({{ p.id }})</option>
-      </select>
+  <!-- Form card -->
+  <section class="shadow card bg-base-100">
+    <div class="card-body">
+      <h2 class="card-title">New Dispatch</h2>
+
+      <form (ngSubmit)="submit()" class="grid grid-cols-1 gap-4">
+        <!-- Product -->
+        <label class="form-control">
+          <span class="label-text">Product</span>
+          <select
+            [(ngModel)]="productId"
+            name="productId"
+            (change)="onFieldChange()"
+            required
+            class="select select-bordered"
+          >
+            <option value="" disabled>Select a product</option>
+            <option *ngFor="let p of products" [value]="p.id">{{ p.name }} ({{ p.id }})</option>
+          </select>
+        </label>
+
+        <!-- From Location -->
+        <label class="form-control">
+          <span class="label-text">From Location</span>
+          <select
+            [(ngModel)]="fromLocationId"
+            name="fromLocationId"
+            (change)="onFieldChange()"
+            required
+            class="select select-bordered"
+          >
+            <option value="" disabled>Select a location</option>
+            <option *ngFor="let l of locations" [value]="l.id">{{ l.name }} ({{ l.id }})</option>
+          </select>
+          <span class="mt-1 text-sm opacity-70" *ngIf="productId && fromLocationId">
+            Available here: <b>{{ available }}</b>
+          </span>
+        </label>
+
+        <!-- Quantity -->
+        <label class="form-control">
+          <span class="label-text">Quantity</span>
+          <input
+            [(ngModel)]="qty"
+            name="qty"
+            type="number"
+            min="1"
+            (input)="onFieldChange()"
+            required
+            class="input input-bordered"
+          />
+          <span *ngIf="qty > available && available >= 0" class="mt-1 text-sm text-error"
+            >Exceeds available.</span
+          >
+        </label>
+
+        <!-- Reference (optional) -->
+        <label class="form-control">
+          <span class="label-text">Reference (optional)</span>
+          <input
+            [(ngModel)]="ref"
+            name="ref"
+            type="text"
+            placeholder="e.g., ORD-9002"
+            class="input input-bordered"
+          />
+        </label>
+
+        <!-- Errors -->
+        <div *ngIf="errorMsg" class="py-2 text-sm alert alert-error">{{ errorMsg }}</div>
+
+        <!-- Actions -->
+        <div class="flex gap-2 pt-2">
+          <button class="btn btn-error" [disabled]="!isValid() || qty > available">Dispatch</button>
+          <button type="button" class="btn btn-ghost" (click)="reset()">Reset</button>
+        </div>
+      </form>
     </div>
-
-    <!-- From Location -->
-    <div>
-      <label class="block text-sm font-medium mb-1">From Location</label>
-      <select
-        [(ngModel)]="fromLocationId"
-        name="fromLocationId"
-        class="border rounded w-full px-2 py-1"
-        (change)="onFieldChange()"
-        required
-        placeholder="Select a location"
-        aria-label="From Location"
-      >
-        <option value="" disabled selected>Select a location</option>
-        <option *ngFor="let l of locations" [value]="l.id">{{ l.name }} ({{ l.id }})</option>
-      </select>
-
-      <p class="text-sm text-gray-600 mt-1" *ngIf="productId && fromLocationId">
-        Available here: <span class="font-medium">{{ available }}</span>
-      </p>
-    </div>
-
-    <!-- Quantity -->
-    <div>
-      <label class="block text-sm font-medium mb-1">Quantity to Dispatch</label>
-      <input
-        type="number"
-        [(ngModel)]="qty"
-        name="qty"
-        min="1"
-        class="border rounded w-full px-2 py-1"
-        (input)="onFieldChange()"
-        required
-        placeholder="e.g., 3"
-      />
-      <p *ngIf="qty > available && available >= 0" class="text-rose-600 text-sm mt-1">
-        You’re trying to dispatch more than available.
-      </p>
-    </div>
-
-    <!-- Optional Reference -->
-    <div>
-      <label class="block text-sm font-medium mb-1">Reference (optional)</label>
-      <input
-        type="text"
-        [(ngModel)]="ref"
-        name="ref"
-        class="border rounded w-full px-2 py-1"
-        placeholder="e.g., ORD-9002"
-      />
-    </div>
-
-    <!-- Errors -->
-    <div *ngIf="errorMsg" class="text-rose-600 text-sm">{{ errorMsg }}</div>
-
-    <!-- Actions -->
-    <div class="flex gap-2">
-      <button
-        type="submit"
-        class="bg-rose-600 text-white px-4 py-2 rounded disabled:opacity-50"
-        [disabled]="!isValid() || qty > available"
-      >
-        Dispatch Stock
-      </button>
-      <button type="button" class="border px-4 py-2 rounded" (click)="reset()">Reset</button>
-    </div>
-  </form>
+  </section>
 </div>

@@ -12,15 +12,15 @@
      NAVBAR (DaisyUI)
      - Left: mobile menu + brand
      - Center: desktop navigation
-     - Right: utilities (theme toggle, badges, etc.)
+     - Right: utilities (theme picker)
      Sticky at top
      =============================== -->
 <div class="sticky top-0 z-50 shadow-sm navbar bg-base-100">
-  <!-- LEFT: mobile menu + brand -->
+  <!-- ========= LEFT: mobile menu + brand ========= -->
   <div class="navbar-start">
     <!-- Mobile menu dropdown -->
     <div class="dropdown">
-      <!-- Hamburger button (DaisyUI handles open/close via focus/tabindex) -->
+      <!-- Hamburger (DaisyUI handles open/close via focus/tabindex) -->
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden" aria-label="Open menu">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -64,45 +64,69 @@
     </a>
   </div>
 
-  <!-- CENTER: desktop navigation -->
+  <!-- ========= CENTER: desktop navigation ========= -->
   <div class="hidden navbar-center lg:flex">
-    <!-- Using routerLinkActive on the LI so DaisyUI's .active styles apply -->
-    <ul class="gap-1 menu menu-horizontal">
-      <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    <!-- Use routerLinkActive on <li> so DaisyUI 'active' styles apply -->
+    <ul class="gap-1 ml-12 menu menu-horizontal">
+      <li
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="font-bold text-md"
+      >
         <a routerLink="/dashboard">Dashboard</a>
       </li>
-      <li routerLinkActive="active"><a routerLink="/inventory">Inventory</a></li>
-      <li routerLinkActive="active"><a routerLink="/receive">Receive</a></li>
-      <li routerLinkActive="active"><a routerLink="/pick">Pick</a></li>
-      <li routerLinkActive="active"><a routerLink="/current-stock">Current Stock</a></li>
+      <li routerLinkActive="active" class="font-bold text-md">
+        <a routerLink="/inventory">Inventory</a>
+      </li>
+      <li routerLinkActive="active" class="font-bold text-md">
+        <a routerLink="/receive">Receive</a>
+      </li>
+      <li routerLinkActive="active" class="font-bold text-md">
+        <a routerLink="/pick">Pick</a>
+      </li>
+      <li routerLinkActive="active" class="font-bold text-md">
+        <a routerLink="/current-stock">Current Stock</a>
+      </li>
       <!-- Hide rarely used links to keep it lean -->
-      <li class="hidden xl:block" routerLinkActive="active">
+      <li class="hidden font-bold xl:block text-md" routerLinkActive="active">
         <a routerLink="/stock-received">Stock Received</a>
       </li>
-      <li class="hidden xl:block" routerLinkActive="active"><a routerLink="/import">Import</a></li>
+      <li class="hidden font-bold xl:block text-md" routerLinkActive="active">
+        <a routerLink="/import">Import</a>
+      </li>
     </ul>
   </div>
 
-  <!-- RIGHT: utilities (theme, quick badges, etc.) -->
+  <!-- ========= RIGHT: utilities (theme picker) ========= -->
   <div class="gap-2 pr-2 navbar-end">
-    <!-- Example quick link/badge (keep commented if not needed) -->
+    <!-- Example quick badge (optional) -->
     <!-- <a class="btn btn-xs btn-warning" routerLink="/current-stock">Low stock</a> -->
 
-    <!-- Theme toggle button (works via ThemeService, persists choice) -->
-    <button class="btn btn-ghost btn-sm" (click)="toggleTheme()" aria-label="Toggle dark mode">
-      <!-- Simple sun/moon icon (you can swap for lucide/heroicons) -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-5 h-5"
-        viewBox="0 0 24 24"
-        fill="currentColor"
+    <!-- Desktop theme dropdown (no FormsModule needed) -->
+    <label class="items-center hidden gap-2 md:flex">
+      <span class="text-sm opacity-70">Theme</span>
+      <select
+        class="select select-sm select-bordered"
+        [value]="theme()"
+        (change)="onThemeChange($event)"
+        aria-label="Select theme"
       >
-        <path
-          d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm8-5a1 1 0 0 1 1 1h1a1 1 0 1 1 0 2h-1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1ZM4 12a1 1 0 0 1 1-1H6a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm12.95 6.536.707.707a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 0 1 1.414-1.414ZM6.05 5.464l-.707-.707A1 1 0 1 1 6.757 3.343l.707.707A1 1 0 1 1 6.05 5.464Zm11.314-1.414.707-.707a1 1 0 0 1 1.414 1.414l-.707.707A1 1 0 1 1 17.364 4.05ZM4.05 17.95l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707A1 1 0 0 1 4.05 17.95Z"
-        />
-      </svg>
-      <span class="sr-only">Toggle theme</span>
-    </button>
+        <option *ngFor="let t of themes" [value]="t">{{ t }}</option>
+      </select>
+    </label>
+
+    <!-- Mobile theme dropdown -->
+    <div class="dropdown dropdown-end md:hidden">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">Theme: {{ theme() }}</div>
+      <ul
+        tabindex="0"
+        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-44 max-h-64 overflow-auto"
+      >
+        <li *ngFor="let t of themes">
+          <button (click)="setTheme(t)">{{ t }}</button>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
 
@@ -113,3 +137,5 @@
 <main id="content" class="px-4 py-6 mx-auto max-w-7xl">
   <router-outlet></router-outlet>
 </main>
+
+<!-- Theme change handler should be implemented in the component TypeScript file, not here. -->

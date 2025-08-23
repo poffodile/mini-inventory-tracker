@@ -1,6 +1,42 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
-import { ThemeService } from '../app/services/theme';
+import { Component, OnInit, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+
+type Theme =
+  | 'light'
+  | 'dark'
+  | 'cupcake'
+  | 'bumblebee'
+  | 'emerald'
+  | 'corporate'
+  | 'synthwave'
+  | 'retro'
+  | 'cyberpunk'
+  | 'valentine'
+  | 'halloween'
+  | 'garden'
+  | 'forest'
+  | 'aqua'
+  | 'lofi'
+  | 'pastel'
+  | 'fantasy'
+  | 'wireframe'
+  | 'black'
+  | 'luxury'
+  | 'dracula'
+  | 'cmyk'
+  | 'autumn'
+  | 'business'
+  | 'acid'
+  | 'lemonade'
+  | 'night'
+  | 'coffee'
+  | 'winter'
+  | 'dim'
+  | 'nord'
+  | 'sunset'
+  | 'caramellatte'
+  | 'abyss'
+  | 'silk';
 
 @Component({
   selector: 'app-root',
@@ -8,18 +44,46 @@ import { ThemeService } from '../app/services/theme';
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
   styleUrl: './app.css',
-  providers: [ThemeService],
 })
-export class App {
-  protected readonly title = signal('mini-inventory-tracker');
+export class App implements OnInit {
+  // current theme (for binding)
+  theme = signal<Theme>('light');
 
-  constructor(private theme: ThemeService) {
-    // set theme on app start (reads saved or system)
-    this.theme.init();
+  // list shown in the dropdown (curated, but you can keep all)
+  themes: Theme[] = [
+    'light',
+    'dark',
+    'cupcake',
+    'corporate',
+    'emerald',
+    'business',
+    'night',
+    'winter',
+    'coffee',
+    'nord',
+    'dim',
+    'retro',
+    'dracula',
+    'lemonade',
+    'sunset',
+    'caramellatte',
+    'abyss',
+    'silk',
+  ];
+
+  ngOnInit(): void {
+    const saved = localStorage.getItem('inventory_theme') as Theme | null;
+    this.setTheme(saved ?? 'light');
   }
 
-  // click handler from the header toggle
-  toggleTheme() {
-    this.theme.toggle();
+  // call from dropdown / buttons
+  setTheme(t: Theme) {
+    document.documentElement.setAttribute('data-theme', t); // DaisyUI switch
+    localStorage.setItem('inventory_theme', t);
+    this.theme.set(t);
+  }
+  onThemeChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.setTheme(value as Theme);
   }
 }

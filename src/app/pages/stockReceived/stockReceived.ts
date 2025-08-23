@@ -183,4 +183,7 @@ export class StockReceived implements OnInit {
       this.page++;
     }
   }
+  onSearchInput(): void {
+    // You can implement search logic here or leave it empty if handled elsewhere
+  }
 }
