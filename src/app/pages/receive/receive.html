@@ -1,95 +1,122 @@
 <!-- ========= PAGE: GOODS RECEIPT ========= -->
 <div class="max-w-2xl space-y-6">
-  <!-- Page header -->
+  <!-- header -->
   <header class="flex items-center justify-between">
     <h1 class="text-2xl font-bold">Receive Goods</h1>
     <a routerLink="/stock-received" class="btn btn-outline btn-sm">View Receipts</a>
   </header>
 
-  <!-- Form card -->
+  <!-- form -->
   <section class="shadow card bg-base-100">
     <div class="card-body">
       <h2 class="card-title">New Receipt</h2>
 
-      <!-- Form -->
+      <!-- little error box if I mess up -->
+      <div *ngIf="errorMsg" class="alert alert-error">
+        <span>{{ errorMsg }}</span>
+      </div>
+
       <form (ngSubmit)="submitForm()" class="grid grid-cols-1 gap-4">
-        <!-- Product -->
+        <!-- product -->
         <label class="form-control">
           <span class="label-text">Product</span>
-          <select [(ngModel)]="productId" name="productId" required class="select select-bordered">
-            <option value="" disabled>Select a product</option>
-            <option *ngFor="let p of products" [value]="p.id">{{ p.name }} ({{ p.id }})</option>
+          <select class="select select-bordered" [(ngModel)]="productId" name="productId" required>
+            <option value="" disabled selected>Choose a product…</option>
+            <option *ngFor="let p of products" [value]="p.id">
+              {{ p.name }} <span class="opacity-60">({{ p.id }})</span>
+            </option>
           </select>
         </label>
 
-        <!-- Quantity -->
+        <!-- qty -->
         <label class="form-control">
           <span class="label-text">Quantity</span>
           <input
-            [(ngModel)]="qty"
-            name="qty"
+            class="input input-bordered"
             type="number"
             min="1"
+            step="1"
+            [(ngModel)]="qty"
+            name="qty"
             required
-            class="input input-bordered"
           />
         </label>
 
-        <!-- To Location -->
+        <!-- destination bin -->
         <label class="form-control">
-          <span class="label-text">To Location</span>
+          <span class="label-text">Destination Bin</span>
           <select
-            [(ngModel)]="locationId"
-            name="locationId"
-            required
             class="select select-bordered"
+            [(ngModel)]="toLocationId"
+            name="toLocationId"
+            required
           >
-            <option value="" disabled>Select a location</option>
-            <option *ngFor="let l of locations" [value]="l.id">{{ l.name }} ({{ l.id }})</option>
+            <option value="" disabled selected>Choose a bin…</option>
+            <option *ngFor="let l of locations" [value]="l.id">
+              {{ l.name }} <span class="opacity-60">({{ l.id }})</span>
+            </option>
           </select>
         </label>
 
-        <!-- Actions -->
-        <div class="flex gap-2 pt-2">
-          <button class="btn btn-primary" [disabled]="!isValid()">Receive</button>
-          <button type="button" class="btn btn-ghost" (click)="resetForm()">Reset</button>
+        <!-- optional reference -->
+        <label class="form-control">
+          <span class="label-text">Reference (optional)</span>
+          <input
+            class="font-mono input input-bordered"
+            type="text"
+            [(ngModel)]="ref"
+            name="ref"
+            placeholder="e.g. PO123 / GRN…"
+          />
+        </label>
+
+        <!-- actions -->
+        <div class="flex gap-2 mt-2">
+          <button class="btn btn-primary" type="submit">Post Goods Receipt</button>
+          <button
+            class="btn btn-ghost"
+            type="button"
+            (click)="productId = ''; toLocationId = ''; qty = 1; ref = ''; errorMsg = ''"
+          >
+            Reset
+          </button>
         </div>
       </form>
     </div>
   </section>
 
-  <!-- Recent receipts table (top 10) -->
+  <!-- recent receipts table (keeps the page lively for screenshots) -->
   <section class="shadow card bg-base-100">
     <div class="card-body">
-      <h2 class="card-title">Recent Receipts</h2>
+      <h2 class="card-title">Recent receipts</h2>
 
       <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table table-zebra">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Product</th>
-              <th>To</th>
+              <th>To Bin</th>
               <th>Qty</th>
               <th>Ref</th>
-              <th>Time</th>
+              <th>When</th>
             </tr>
           </thead>
           <tbody>
             @for (m of recentReceipts; track m.id) {
             <tr>
-              <td>{{ m.id }}</td>
               <td>
-                {{ productName(m.productId) }} <span class="opacity-60">({{ m.productId }})</span>
+                {{ productLabel(m.productId) }}
+                <span class="font-mono opacity-60">({{ m.productId }})</span>
               </td>
-              <td>{{ locationName(m.toLocationId) }}</td>
-              <td class="text-success">+{{ m.qty }}</td>
-              <td>{{ m.ref }}</td>
+              <td class="font-mono">{{ locationLabel(m.toLocationId) }}</td>
+              <td class="font-mono text-success">+{{ m.qty }}</td>
+              <td class="font-mono">{{ m.ref || '-' }}</td>
               <td>{{ m.timestamp | date : 'medium' }}</td>
             </tr>
             }
           </tbody>
         </table>
+
         <div *ngIf="recentReceipts.length === 0" class="mt-3 alert">
           <span>No receipts yet.</span>
         </div>

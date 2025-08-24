@@ -1,141 +1,50 @@
-<!-- ===============================
-     A11y: Skip link to main content
-     =============================== -->
-<a
-  href="#content"
-  class="z-50 sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 btn btn-sm btn-primary"
->
-  Skip to content
-</a>
-
-<!-- ===============================
-     NAVBAR (DaisyUI)
-     - Left: mobile menu + brand
-     - Center: desktop navigation
-     - Right: utilities (theme picker)
-     Sticky at top
-     =============================== -->
 <div class="sticky top-0 z-50 shadow-sm navbar bg-base-100">
-  <!-- ========= LEFT: mobile menu + brand ========= -->
-  <div class="navbar-start">
-    <!-- Mobile menu dropdown -->
-    <div class="dropdown">
-      <!-- Hamburger (DaisyUI handles open/close via focus/tabindex) -->
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden" aria-label="Open menu">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
-      </div>
+  <div class="gap-2 navbar-start">
+    <a class="text-xl btn btn-ghost" routerLink="/dashboard">Mini Inventory</a>
 
-      <!-- Mobile menu items -->
+    <!-- mobile nav -->
+    <div class="dropdown md:hidden">
+      <div tabindex="0" role="button" class="btn btn-ghost">Menu</div>
       <ul
         tabindex="0"
-        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-56"
+        class="menu menu-sm dropdown-content bg-base-100 rounded-box shadow w-52 z-[1]"
       >
-        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <a routerLink="/dashboard">Dashboard</a>
-        </li>
-        <li routerLinkActive="active"><a routerLink="/inventory">Inventory</a></li>
-        <li routerLinkActive="active"><a routerLink="/receive">Receive</a></li>
-        <li routerLinkActive="active"><a routerLink="/pick">Pick</a></li>
-        <li routerLinkActive="active"><a routerLink="/current-stock">Current Stock</a></li>
-        <!-- Optional / rarer pages -->
-        <li class="lg:hidden" routerLinkActive="active">
-          <a routerLink="/stock-received">Stock Received</a>
-        </li>
-        <li class="lg:hidden" routerLinkActive="active"><a routerLink="/import">Import</a></li>
+        <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+        <li><a routerLink="/receive" routerLinkActive="active">Receive</a></li>
+        <li><a routerLink="/pick" routerLinkActive="active">Pick</a></li>
+        <li><a routerLink="/current-stock" routerLinkActive="active">Current Stock</a></li>
+        <li><a routerLink="/stock-received" routerLinkActive="active">Stock Received</a></li>
       </ul>
     </div>
-
-    <!-- Brand -->
-    <a class="font-semibold btn btn-ghost text-primary lg:text-xl" routerLink="/dashboard">
-      Mini Inventory Tracker
-    </a>
   </div>
 
-  <!-- ========= CENTER: desktop navigation ========= -->
-  <div class="hidden navbar-center lg:flex">
-    <!-- Use routerLinkActive on <li> so DaisyUI 'active' styles apply -->
-    <ul class="gap-1 ml-12 menu menu-horizontal">
-      <li
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="font-bold text-md"
-      >
-        <a routerLink="/dashboard">Dashboard</a>
-      </li>
-      <li routerLinkActive="active" class="font-bold text-md">
-        <a routerLink="/inventory">Inventory</a>
-      </li>
-      <li routerLinkActive="active" class="font-bold text-md">
-        <a routerLink="/receive">Receive</a>
-      </li>
-      <li routerLinkActive="active" class="font-bold text-md">
-        <a routerLink="/pick">Pick</a>
-      </li>
-      <li routerLinkActive="active" class="font-bold text-md">
-        <a routerLink="/current-stock">Current Stock</a>
-      </li>
-      <!-- Hide rarely used links to keep it lean -->
-      <li class="hidden font-bold xl:block text-md" routerLinkActive="active">
-        <a routerLink="/stock-received">Stock Received</a>
-      </li>
-      <li class="hidden font-bold xl:block text-md" routerLinkActive="active">
-        <a routerLink="/import">Import</a>
-      </li>
+  <div class="hidden navbar-center md:flex">
+    <ul class="px-1 menu menu-horizontal">
+      <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+      <li><a routerLink="/receive" routerLinkActive="active">Receive</a></li>
+      <li><a routerLink="/pick" routerLinkActive="active">Pick</a></li>
+      <li><a routerLink="/current-stock" routerLinkActive="active">Current Stock</a></li>
+      <li><a routerLink="/stock-received" routerLinkActive="active">Stock Received</a></li>
     </ul>
   </div>
 
-  <!-- ========= RIGHT: utilities (theme picker) ========= -->
-  <div class="gap-2 pr-2 navbar-end">
-    <!-- Example quick badge (optional) -->
-    <!-- <a class="btn btn-xs btn-warning" routerLink="/current-stock">Low stock</a> -->
+  <div class="navbar-end"></div>
 
-    <!-- Desktop theme dropdown (no FormsModule needed) -->
-    <label class="items-center hidden gap-2 md:flex">
-      <span class="text-sm opacity-70">Theme</span>
-      <select
-        class="select select-sm select-bordered"
-        [value]="theme()"
-        (change)="onThemeChange($event)"
-        aria-label="Select theme"
-      >
-        <option *ngFor="let t of themes" [value]="t">{{ t }}</option>
-      </select>
-    </label>
+  <!-- Theme toggle  -->
 
-    <!-- Mobile theme dropdown -->
-    <div class="dropdown dropdown-end md:hidden">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">Theme: {{ theme() }}</div>
-      <ul
-        tabindex="0"
-        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-44 max-h-64 overflow-auto"
-      >
-        <li *ngFor="let t of themes">
-          <button (click)="setTheme(t)">{{ t }}</button>
-        </li>
-      </ul>
-    </div>
-  </div>
+  <!-- Theme toggle: flips between Business (dark) and Light -->
+  <label class="flex items-center gap-2 cursor-pointer swap">
+    <!-- the toggle controls both: theme AND which label shows -->
+    <input
+      type="checkbox"
+      class="toggle toggle-sm"
+      data-toggle-theme="luxury,light"
+      aria-label="Toggle dark mode"
+    />
+    <span class="text-sm swap-off">Dark</span>
+    <span class="text-sm swap-on">Light</span>
+  </label>
 </div>
-
-<!-- ===============================
-     MAIN CONTENT WRAPPER
-     - matches your page container width
-     =============================== -->
-<main id="content" class="px-4 py-6 mx-auto max-w-7xl">
+<main class="container p-4 mx-auto md:p-6">
   <router-outlet></router-outlet>
 </main>
-
-<!-- Theme change handler should be implemented in the component TypeScript file, not here. -->

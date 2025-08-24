@@ -1,178 +1,107 @@
-// stockReceived.ts
+// ========= Stock Received (audit list) =========
+// my rules here:
+// - read ALL movements from my DataService, but only show type === 'RECEIPT'
+// - search across product, bin, ref, ids
+// - date range filter (from / to)
+// - sort newest/oldest, simple paging
+// - labels always via DataService.productName() / locationName()
+// - export buttons for CSV + JSON based on my CURRENT filtered list
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // ⬅️ add this
+import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data';
 import { Movement } from '../../interfaceTypes/Movement';
-import { Product } from '../../interfaceTypes/Product';
-// add search by time later
+
+type Receipt = Movement & { type: 'RECEIPT' };
+
 @Component({
   selector: 'app-stock-received',
   standalone: true,
-  imports: [CommonModule, FormsModule], // ⬅️ add FormsModule
+  imports: [CommonModule, FormsModule],
   templateUrl: './stockReceived.html',
-  styleUrls: ['./stockReceived.css'],
 })
 export class StockReceived implements OnInit {
-  // raw receipts
-  private allReceipts: Movement[] = [];
+  // source + working sets
+  receipts: Receipt[] = [];
+  filtered: Receipt[] = [];
 
-  // lookup maps for pretty names
-  private productNameById = new Map<string, string>();
-  private locationNameById = new Map<string, string>();
-
-  // search box
   // filters
   searchText = '';
   dateFrom = ''; // yyyy-mm-dd
   dateTo = ''; // yyyy-mm-dd
+  sortDir: 'desc' | 'asc' = 'desc';
 
-  // what the table shows after filtering
-  visible: Movement[] = [];
-
-  // simple sort
-  sortDir: 'asc' | 'desc' = 'desc'; // default: newest first
-
-  // pagination
+  // paging
   page = 1;
-  pageSize = 20;
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.visible.length / this.pageSize));
-  }
-  get paged(): Movement[] {
-    const start = (this.page - 1) * this.pageSize;
-    return this.visible.slice(start, start + this.pageSize);
-  }
-  get totalQtyVisible(): number {
-    return this.visible.reduce((sum, r) => sum + (r.qty ?? 0), 0);
-  }
-  get totalQtyPage(): number {
-    return this.paged.reduce((sum, r) => sum + (r.qty ?? 0), 0);
-  }
+  pageSize = 10;
 
-  constructor(private dataService: DataService) {}
+  constructor(private data: DataService) {}
 
   ngOnInit(): void {
-    // build lookups
-    const products = this.dataService.getData<Product>('products') || [];
-    products.forEach((p) => this.productNameById.set(p.id, p.name));
-
-    const locations = this.dataService.getData<{ id: string; name: string }>('locations') || [];
-    locations.forEach((l) => this.locationNameById.set(l.id, l.name));
-
-    //load movements and keep only receipts
-    const allMovements = this.dataService.getData<Movement>('movements') || [];
-    this.allReceipts = allMovements.filter((m) => m.type === 'RECEIPT');
-    this.applySearch(); // initial render
+    const all = (this.data.getData<Movement>('movements') ?? []).slice();
+    const onlyReceipts = all.filter((m) => m?.type === 'RECEIPT') as Receipt[];
+    // default newest first
+    onlyReceipts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    this.receipts = onlyReceipts;
+    this.applyFilters(true);
   }
 
-  // friendly helpers for template
-  productName(id?: string): string {
-    return id ? this.productNameById.get(id) ?? id : '-';
+  // labels must go through my service so they match everywhere in the app
+  productLabel(id?: string) {
+    return id ? this.data.productName(id) : '-';
   }
-  locationName(id?: string): string {
-    return id ? this.locationNameById.get(id) ?? id : '-';
+  locationLabel(id?: string) {
+    return id ? this.data.locationName(id) : '-';
   }
 
-  // filter by any field (id, productId, ref, location, qty, date...)
-  applySearch(): void {
+  // main filter + sort
+  applyFilters(resetPage: boolean = true): void {
     const q = this.searchText.trim().toLowerCase();
-    // text search
-    let rows = !q
-      ? [...this.allReceipts]
-      : this.allReceipts.filter((m) => {
-          // flatten all possible values into one string
-          const values = [
-            m.id,
-            m.productId,
-            m.ref,
-            m.toLocationId,
-            m.fromLocationId,
-            m.qty?.toString(),
-            m.timestamp, // ISO string, so "2025-08-20" will match
-          ]
-            .filter(Boolean) // remove undefined
-            .map((v) => v!.toString().toLowerCase());
+    const from = this.dateFrom ? new Date(this.dateFrom).getTime() : Number.NEGATIVE_INFINITY;
+    const to = this.dateTo
+      ? new Date(this.dateTo + 'T23:59:59.999').getTime()
+      : Number.POSITIVE_INFINITY;
 
-          // also include friendly names in the haystack
-          values.push(
-            this.productName(m.productId).toLowerCase(),
-            this.locationName(m.toLocationId).toLowerCase()
-          );
+    let rows = this.receipts.filter((r) => {
+      const t = new Date(r.timestamp).getTime();
+      if (t < from || t > to) return false;
 
-          return values.some((v) => v.includes(q));
-        });
-
-    // date range filter (inclusive)
-    if (this.dateFrom) {
-      const from = new Date(this.dateFrom).getTime();
-      rows = rows.filter((r) => new Date(r.timestamp).getTime() >= from);
-    }
-    if (this.dateTo) {
-      const to = new Date(this.dateTo + 'T23:59:59.999Z').getTime();
-      rows = rows.filter((r) => new Date(r.timestamp).getTime() <= to);
-    }
-    //sort by timestamp
-    rows = this.sortByTimestamp(rows, this.sortDir);
-
-    this.visible = rows;
-    this.page = 1; // reset to first page whenever filters change
-  }
-
-  // toggle sort direction
-  toggleSort(): void {
-    this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-    this.applySearch();
-  }
-
-  // Sorts the rows by timestamp in the specified direction
-  private sortByTimestamp(rows: Movement[], dir: 'asc' | 'desc'): Movement[] {
-    return rows.slice().sort((a, b) => {
-      const tA = new Date(a.timestamp).getTime();
-      const tB = new Date(b.timestamp).getTime();
-      return dir === 'asc' ? tA - tB : tB - tA;
+      if (!q) return true;
+      const prod = `${this.productLabel(r.productId)} ${r.productId}`.toLowerCase();
+      const loc = `${this.locationLabel(r.toLocationId)} ${r.toLocationId}`.toLowerCase();
+      const ref = (r.ref ?? '').toLowerCase();
+      const id = (r.id ?? '').toLowerCase();
+      return prod.includes(q) || loc.includes(q) || ref.includes(q) || id.includes(q);
     });
-  }
 
-  // ---- Export helpers ----
-  exportJSON(all = false): void {
-    const data = all ? this.allReceipts : this.visible;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    this.download(
-      url,
-      `receipts${all ? '-all' : ''}-${new Date().toISOString().slice(0, 10)}.json`
+    rows.sort((a, b) =>
+      this.sortDir === 'desc'
+        ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        : new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
+
+    this.filtered = rows;
+    if (resetPage) this.page = 1;
   }
 
-  exportCSV(all = false): void {
-    const rows = all ? this.allReceipts : this.visible;
-    const header = [
-      'id',
-      'type',
-      'productId',
-      'toLocationId',
-      'fromLocationId',
-      'qty',
-      'ref',
-      'timestamp',
-    ];
-    const csv = [header.join(',')]
-      .concat(rows.map((r) => header.map((h) => (r as any)[h] ?? '').join(',')))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    this.download(url, `receipts${all ? '-all' : ''}-${new Date().toISOString().slice(0, 10)}.csv`);
+  onSearchInput() {
+    this.applyFilters(true);
   }
 
-  private download(url: string, filename: string): void {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+  toggleSort(): void {
+    this.sortDir = this.sortDir === 'desc' ? 'asc' : 'desc';
+    this.applyFilters(false);
   }
 
+  // paging helpers
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+  }
+  get paged(): Receipt[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filtered.slice(start, start + this.pageSize);
+  }
   prevPage() {
     if (this.page > 1) {
       this.page--;
@@ -183,7 +112,59 @@ export class StockReceived implements OnInit {
       this.page++;
     }
   }
-  onSearchInput(): void {
-    // You can implement search logic here or leave it empty if handled elsewhere
+
+  // totals (nice for the screenshot footer)
+  get totalQtyVisible(): number {
+    return this.filtered.reduce((s, r) => s + (r.qty || 0), 0);
+  }
+  get totalQtyPage(): number {
+    return this.paged.reduce((s, r) => s + (r.qty || 0), 0);
+  }
+
+  // export current FILTERED list to CSV/JSON for the interviewer
+  exportCSV(): void {
+    const rows = this.filtered;
+    const header = [
+      'id',
+      'productId',
+      'productName',
+      'toLocationId',
+      'toLocationName',
+      'qty',
+      'ref',
+      'timestamp',
+    ];
+    const body = rows.map((r) => [
+      r.id ?? '',
+      r.productId,
+      this.productLabel(r.productId),
+      r.toLocationId ?? '',
+      this.locationLabel(r.toLocationId),
+      String(r.qty ?? 0),
+      r.ref ?? '',
+      r.timestamp,
+    ]);
+
+    const csv = [header, ...body]
+      .map((line) => line.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stock-received.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  exportJSON(): void {
+    const blob = new Blob([JSON.stringify(this.filtered, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stock-received.json';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }

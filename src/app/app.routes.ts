@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { CurrentStock } from './pages/currentStock/currentStock';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
